@@ -67,9 +67,9 @@ install_bot() {
     # 3. Clonar y Compilar Proyecto Repo
     log_info "Descargando y compilando el Bot en Go..."
     cd /tmp
-    rm -rf DarkZsaid-Go-Bot
-    git clone https://github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot.git || { log_error "Error al descargar el bot."; exit 1; }
-    cd DarkZsaid-Go-Bot
+    rm -rf /tmp/DarkZsaid-Go-Bot
+    git clone https://github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot.git /tmp/DarkZsaid-Go-Bot || { log_error "Error al descargar el bot."; exit 1; }
+    cd /tmp/DarkZsaid-Go-Bot || { log_error "No se pudo entrar al directorio del bot."; exit 1; }
 
     log_info "Descargando módulos necesarios..."
     go mod tidy
