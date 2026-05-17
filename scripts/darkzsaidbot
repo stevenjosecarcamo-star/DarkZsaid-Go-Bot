@@ -1,0 +1,51 @@
+#!/bin/bash
+
+while true; do
+clear
+echo "======================================"
+echo " 💎 BOT TELEGRAM DARKZSAID V7.7"
+echo "======================================"
+echo ""
+echo "[1] Estado del bot DarkZsaid"
+echo "[2] Encender bot DarkZsaid"
+echo "[3] Apagar bot DarkZsaid"
+echo "[4] Reiniciar bot DarkZsaid"
+echo "[0] Salir"
+echo ""
+read -p "Seleccione una opción: " op
+
+case "$op" in
+  1)
+    systemctl status darkzsaid.service --no-pager
+    echo ""
+    read -p "ENTER para continuar..."
+    ;;
+  2)
+    systemctl start darkzsaid.service
+    echo ""
+    echo "Bot DarkZsaid encendido."
+    read -p "ENTER para continuar..."
+    ;;
+  3)
+    systemctl stop darkzsaid.service
+    echo ""
+    echo "Bot DarkZsaid apagado."
+    read -p "ENTER para continuar..."
+    ;;
+  4)
+    systemctl restart darkzsaid.service
+    echo ""
+    echo "Bot DarkZsaid reiniciado."
+    read -p "ENTER para continuar..."
+    ;;
+  0)
+    clear
+    exit 0
+    ;;
+  *)
+    echo ""
+    echo "Opción inválida."
+    sleep 1
+    ;;
+esac
+done
