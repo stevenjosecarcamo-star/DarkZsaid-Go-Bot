@@ -69,7 +69,7 @@ func RunUpdate() error {
 sleep 2
 cd /tmp
 rm -rf BOT-TELEGRAM-VPN
-git clone https://github.com/DarkZsaidscript/BOT-TELEGRAM-VPN.git
+git clone https://github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot.git
 cd BOT-TELEGRAM-VPN
 export PATH=$PATH:/usr/local/go/bin
 go mod tidy

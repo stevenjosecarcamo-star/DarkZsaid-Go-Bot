@@ -193,7 +193,7 @@ bash <(curl -sL https://raw.githubusercontent.com/DarkZsaidscript/BOT-TELEGRAM-V
 ```bash
 systemctl stop darkzsaid
 cd /tmp && rm -rf BOT-TELEGRAM-VPN
-git clone https://github.com/DarkZsaidscript/BOT-TELEGRAM-VPN.git
+git clone https://github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot.git
 cd BOT-TELEGRAM-VPN
 export PATH=$PATH:/usr/local/go/bin
 go build -o /usr/local/bin/darkzsaid-bot cmd/darkzsaid/main.go
