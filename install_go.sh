@@ -1,3 +1,32 @@
+
+install_go_moderno() {
+    GO_VERSION="1.26.3"
+
+    echo "[INFO] Instalando Go ${GO_VERSION} oficial..."
+
+    rm -rf /usr/local/go
+    rm -f "/tmp/go${GO_VERSION}.linux-amd64.tar.gz"
+
+    wget -q "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -O "/tmp/go${GO_VERSION}.linux-amd64.tar.gz"
+
+    if [ ! -f "/tmp/go${GO_VERSION}.linux-amd64.tar.gz" ]; then
+        echo "[ERROR] No se pudo descargar Go ${GO_VERSION}"
+        exit 1
+    fi
+
+    tar -C /usr/local -xzf "/tmp/go${GO_VERSION}.linux-amd64.tar.gz"
+
+    export PATH=/usr/local/go/bin:$PATH
+
+    if ! /usr/local/go/bin/go version >/dev/null 2>&1; then
+        echo "[ERROR] Go no quedó instalado correctamente"
+        exit 1
+    fi
+
+    echo "[INFO] Go instalado:"
+    /usr/local/go/bin/go version
+}
+
 #!/bin/bash
 set -euo pipefail
 
@@ -59,9 +88,9 @@ install_bot() {
     export PATH=$PATH:/usr/local/go/bin
     if ! command -v go &> /dev/null; then
         log_info "Instalando GoLang..."
-        wget -q https://go.dev/dl/go1.21.0.linux-amd64.tar.gz
-        rm -rf /usr/local/go && tar -C /usr/local -xzf go1.21.0.linux-amd64.tar.gz
-        rm go1.21.0.linux-amd64.tar.gz
+        wget -q https://go.dev/dl/go1.26.3.linux-amd64.tar.gz
+        rm -rf /usr/local/go && tar -C /usr/local -xzf go1.26.3.linux-amd64.tar.gz
+        rm go1.26.3.linux-amd64.tar.gz
     fi
 
     # 3. Clonar y Compilar Proyecto Repo
@@ -72,9 +101,13 @@ install_bot() {
     cd /tmp/DarkZsaid-Go-Bot || { log_error "No se pudo entrar al directorio del bot."; exit 1; }
 
     log_info "Descargando módulos necesarios..."
-    go mod tidy
+    install_go_moderno
 
-    go build -o /usr/local/bin/darkzsaid-bot cmd/darkzsaid/main.go
+export PATH=/usr/local/go/bin:$PATH
+go mod tidy
+
+    export PATH=/usr/local/go/bin:$PATH
+go build -o /usr/local/bin/darkzsaid-bot cmd/darkzsaid/main.go
     chmod +x /usr/local/bin/darkzsaid-bot
     rm -rf /tmp/DarkZsaid-Go-Bot
     cd ~
