@@ -25,7 +25,7 @@ func PerformFullCleanup() (string, error) {
 
 	// 3. Limpiar temporales de compilación
 	report += "🧹 <b>Temp:</b> Borrando carpetas de instalación temporales...\n"
-	_ = exec.Command("rm", "-rf", "/tmp/BOT-TELEGRAM-VPN").Run()
+	_ = exec.Command("rm", "-rf", "/tmp/DarkZsaid-Go-Bot").Run()
 	_ = exec.Command("rm", "-rf", "/root/go/pkg").Run()
 
 	// 4. Limpiar caché de compilación de Go (si existe el binario)

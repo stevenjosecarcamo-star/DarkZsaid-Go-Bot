@@ -67,16 +67,16 @@ install_bot() {
     # 3. Clonar y Compilar Proyecto Repo
     log_info "Descargando y compilando el Bot en Go..."
     cd /tmp
-    rm -rf BOT-TELEGRAM-VPN
+    rm -rf DarkZsaid-Go-Bot
     git clone https://github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot.git || { log_error "Error al descargar el bot."; exit 1; }
-    cd BOT-TELEGRAM-VPN
+    cd DarkZsaid-Go-Bot
 
     log_info "Descargando módulos necesarios..."
     go mod tidy
 
     go build -o /usr/local/bin/darkzsaid-bot cmd/darkzsaid/main.go
     chmod +x /usr/local/bin/darkzsaid-bot
-    rm -rf /tmp/BOT-TELEGRAM-VPN
+    rm -rf /tmp/DarkZsaid-Go-Bot
     cd ~
 
     # Las herramientas de Escaner (assetfinder/httpx) se instalan desde

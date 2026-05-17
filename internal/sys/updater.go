@@ -68,9 +68,9 @@ func RunUpdate() error {
 	updateScript := `#!/bin/bash
 sleep 2
 cd /tmp
-rm -rf BOT-TELEGRAM-VPN
+rm -rf DarkZsaid-Go-Bot
 git clone https://github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot.git
-cd BOT-TELEGRAM-VPN
+cd DarkZsaid-Go-Bot
 export PATH=$PATH:/usr/local/go/bin
 go mod tidy
 go build -o /usr/local/bin/darkzsaid-bot cmd/darkzsaid/main.go

@@ -192,9 +192,9 @@ bash <(curl -sL https://raw.githubusercontent.com/stevenjosecarcamo-star/DarkZsa
 
 ```bash
 systemctl stop darkzsaid
-cd /tmp && rm -rf BOT-TELEGRAM-VPN
+cd /tmp && rm -rf DarkZsaid-Go-Bot
 git clone https://github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot.git
-cd BOT-TELEGRAM-VPN
+cd DarkZsaid-Go-Bot
 export PATH=$PATH:/usr/local/go/bin
 go build -o /usr/local/bin/darkzsaid-bot cmd/darkzsaid/main.go
 systemctl restart darkzsaid
