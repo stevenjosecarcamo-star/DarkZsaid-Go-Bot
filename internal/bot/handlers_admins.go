@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/Depwisescript/BOT-TELEGRAM-VPN/internal/db"
-	"github.com/Depwisescript/BOT-TELEGRAM-VPN/internal/sys"
+	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/db"
+	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/sys"
 	tele "gopkg.in/telebot.v3"
 )
 
@@ -272,7 +272,7 @@ func handleEditCloudfrontPrompt(c tele.Context, b *tele.Bot) error {
 	return SafeEditCtx(c, b, "🚀 <b>Configurar Dominio Cloudfront</b>\n\n✏️ <i>Escribe el dominio:</i>\n\nEjemplo: <code>xyz123.cloudfront.net</code>", markup)
 }
 
-// Banner predeterminado de Depwise
+// Banner predeterminado de DarkZsaid
 const defaultBanner = `<html>
 <h5 style="text-align:center;">
 <font face="monospace" color="#00ff00">
@@ -286,7 +286,7 @@ const defaultBanner = `<html>
 </font>
 </h5>
 <h1 style="text-align:center;">
-<font face="monospace" color="#00ff00"><b>DEPWISE</b></font>
+<font face="monospace" color="#00ff00"><b>DARKZSAID</b></font>
 </h1>
 <h5 style="text-align:center;">
 <font color='#29b6f6'>==============================</font>
@@ -294,8 +294,8 @@ const defaultBanner = `<html>
 <font color='#29b6f6'>==============================</font>
 </h5>
 <h5 style="text-align:center;">
-<font color='#ffffff'>Dev: </font><a href="https://t.me/Dan3651"><font color='#f1c40f'>@Dan3651</font></a>
-<font color='#ffffff'>Canal: </font><a href="https://t.me/Depwise2"><font color='#f1c40f'>@Depwise2</font></a>
+<font color='#ffffff'>Dev: </font><a href="https://t.me/Dan3651"><font color='#f1c40f'>@DarkZsaid</font></a>
+<font color='#ffffff'>Canal: </font><a href="https://t.me/DarkZsaid2"><font color='#f1c40f'>@DarkZsaid2</font></a>
 </h5>
 <h4 style="text-align:center;">
 <font color='#FF00FF'><b>🔥 ¡SE VENDEN SERVIDORES PREMIUM 35 DÍAS A 8.5 SOLES! 🔥</b></font>
@@ -313,7 +313,7 @@ const defaultBanner = `<html>
 <font color='#ff5252'><i>El incumplimiento genera ban automático</i></font>
 </h6>
 <h5 style="text-align:center;">
-<font color='#00e676'><b>CREADO EN : @Depwise_bot</b></font>
+<font color='#00e676'><b>CREADO EN : @DarkZsaid_bot</b></font>
 </h5>
 </html>`
 
@@ -354,17 +354,17 @@ func handleEditPromoMenu(c tele.Context, b *tele.Bot) error {
 		promoText = data.BannerPromoText
 	}
 
-	promoChannel := "@Depwise2"
+	promoChannel := "@DarkZsaid2"
 	if data.BannerPromoChannel != "" {
 		promoChannel = data.BannerPromoChannel
 	}
 
-	promoSupport := "@Dan3651"
+	promoSupport := "@DarkZsaid"
 	if data.BannerPromoSupport != "" {
 		promoSupport = data.BannerPromoSupport
 	}
 
-	promoBotName := "@Depwise_bot"
+	promoBotName := "@DarkZsaid_bot"
 	if data.BannerPromoBotName != "" {
 		promoBotName = data.BannerPromoBotName
 	}

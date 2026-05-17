@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # =========================================================
-# INSTALADOR UNIVERSAL V7.1: BOT TELEGRAM DEPWISE SSH 💎 (GO EDITION)
+# INSTALADOR UNIVERSAL V7.1: BOT TELEGRAM DARKZSAID SSH 💎 (GO EDITION)
 # =========================================================
 
 RED='\033[0;31m'
@@ -20,12 +20,12 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-PROJECT_DIR="/opt/depwise_bot"
+PROJECT_DIR="/opt/darkzsaid_bot"
 ENV_FILE="$PROJECT_DIR/.env"
 
 install_bot() {
     echo -e "${GREEN}=================================================="
-    echo -e "       CONFIGURACION BOT DEPWISE V7.1 (GO)"
+    echo -e "       CONFIGURACION BOT DARKZSAID V7.1 (GO)"
     echo -e "==================================================${NC}"
 
     # Cargar credenciales si ya existen para no volver a pedirlas
@@ -68,14 +68,14 @@ install_bot() {
     log_info "Descargando y compilando el Bot en Go..."
     cd /tmp
     rm -rf BOT-TELEGRAM-VPN
-    git clone https://github.com/Depwisescript/BOT-TELEGRAM-VPN.git || { log_error "Error al descargar el bot."; exit 1; }
+    git clone https://github.com/DarkZsaidscript/BOT-TELEGRAM-VPN.git || { log_error "Error al descargar el bot."; exit 1; }
     cd BOT-TELEGRAM-VPN
 
     log_info "Descargando módulos necesarios..."
     go mod tidy
 
-    go build -o /usr/local/bin/depwise-bot cmd/depwise/main.go
-    chmod +x /usr/local/bin/depwise-bot
+    go build -o /usr/local/bin/darkzsaid-bot cmd/darkzsaid/main.go
+    chmod +x /usr/local/bin/darkzsaid-bot
     rm -rf /tmp/BOT-TELEGRAM-VPN
     cd ~
 
@@ -84,9 +84,9 @@ install_bot() {
 
     # 4. Servicio Systemd
     log_info "Generando sistema daemon SystemD..."
-    cat << EOF > /etc/systemd/system/depwise.service
+    cat << EOF > /etc/systemd/system/darkzsaid.service
 [Unit]
-Description=Depwise Telegram Bot (Go Edition)
+Description=DarkZsaid Telegram Bot (Go Edition)
 After=network.target
 
 [Service]
@@ -94,7 +94,7 @@ Type=simple
 User=root
 EnvironmentFile=$ENV_FILE
 Environment="GOMEMLIMIT=40MiB" "GOGC=20"
-ExecStart=/usr/local/bin/depwise-bot
+ExecStart=/usr/local/bin/darkzsaid-bot
 Restart=always
 RestartSec=5
 
@@ -103,8 +103,8 @@ WantedBy=multi-user.target
 EOF
 
     systemctl daemon-reload
-    systemctl enable depwise.service
-    systemctl restart depwise.service
+    systemctl enable darkzsaid.service
+    systemctl restart darkzsaid.service
 
     echo -e "${GREEN}=================================================="
     echo -e "       INSTALACION V7.1 COMPLETADA 💎"
@@ -129,8 +129,8 @@ uninstall_all() {
     fi
 
     log_info "1/4 Deteniendo servicios..."
-    systemctl stop depwise.service 2>/dev/null || true
-    systemctl disable depwise.service 2>/dev/null || true
+    systemctl stop darkzsaid.service 2>/dev/null || true
+    systemctl disable darkzsaid.service 2>/dev/null || true
     
     # Detener proxies y vpns
     local services=("badvpn" "proxydt" "stunnel4" "dropbear" "falconproxy" "udpcustom" "zivpn" "nsd")
@@ -141,8 +141,8 @@ uninstall_all() {
     done
 
     log_info "2/4 Eliminando archivos y binarios..."
-    rm -f /usr/local/bin/depwise-bot
-    rm -f /etc/systemd/system/depwise.service
+    rm -f /usr/local/bin/darkzsaid-bot
+    rm -f /etc/systemd/system/darkzsaid.service
     rm -rf "$PROJECT_DIR"
     rm -f /root/bot_data.json
     
@@ -172,7 +172,7 @@ uninstall_all() {
 show_menu() {
     clear
     echo -e "${CYAN}=================================================="
-    echo -e "       DEPWISE BOT INSTALLER (GO EDITION)"
+    echo -e "       DARKZSAID BOT INSTALLER (GO EDITION)"
     echo -e "==================================================${NC}"
     echo -e "  1. ${GREEN}Instalar / Actualizar Bot${NC}"
     echo -e "  2. ${RED}Desinstalar Todo (Bot + VPNs)${NC}"

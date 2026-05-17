@@ -3,8 +3,8 @@ package bot
 import (
 	"fmt"
 
-	"github.com/Depwisescript/BOT-TELEGRAM-VPN/internal/db"
-	"github.com/Depwisescript/BOT-TELEGRAM-VPN/internal/vpn"
+	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/db"
+	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/vpn"
 	tele "gopkg.in/telebot.v3"
 )
 

@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Depwisescript/BOT-TELEGRAM-VPN/internal/db"
-	"github.com/Depwisescript/BOT-TELEGRAM-VPN/internal/sys"
-	"github.com/Depwisescript/BOT-TELEGRAM-VPN/internal/vpn"
+	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/db"
+	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/sys"
+	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/vpn"
 	tele "gopkg.in/telebot.v3"
 )
 

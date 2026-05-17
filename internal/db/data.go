@@ -96,7 +96,7 @@ type SlowDNSConfig struct {
 
 var (
 	mutex sync.Mutex
-	dir   = "/opt/depwise_bot"
+	dir   = "/opt/darkzsaid_bot"
 )
 
 // SetDir permite cambiar el directorio del DB (util para testing local)

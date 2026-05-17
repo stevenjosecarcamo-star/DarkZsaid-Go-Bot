@@ -1,4 +1,4 @@
-# 💎 DEPWISE BOT GO EDITION
+# 💎 DARKZSAID BOT GO EDITION
 
 <p align="center">
   <img src="https://img.shields.io/badge/Language-Go-00ADD8?style=for-the-badge&logo=go" alt="Go">
@@ -10,9 +10,9 @@
 
 ---
 
-## 🚀 ¿Qué es Depwise Bot?
+## 🚀 ¿Qué es DarkZsaid Bot?
 
-**Depwise Bot Go Edition** es una solución integral y de alto rendimiento para la gestión de servidores VPN y cuentas SSH a través de Telegram. Reescrito completamente en **Go** para garantizar velocidad, estabilidad y bajo consumo de recursos, este bot transforma tu VPS en un panel de control profesional y automatizado.
+**DarkZsaid Bot Go Edition** es una solución integral y de alto rendimiento para la gestión de servidores VPN y cuentas SSH a través de Telegram. Reescrito completamente en **Go** para garantizar velocidad, estabilidad y bajo consumo de recursos, este bot transforma tu VPS en un panel de control profesional y automatizado.
 
 ---
 
@@ -73,16 +73,16 @@ Cada cuenta SSH ahora genera automáticamente un **banner HTML personalizado** q
 
 | Elemento | Descripción |
 |----------|-------------|
-| 🎨 **Logo Depwise** | Logo animado en arte braille (idéntico al banner global) |
+| 🎨 **Logo DarkZsaid** | Logo animado en arte braille (idéntico al banner global) |
 | 🏷️ **Título Personalizado** | El admin elige el título al crear la cuenta (ej: `INTERNET ILIMITADO`, `SPEED PREMIUM VIP`) |
 | 👤 **Datos de la Cuenta** | Usuario, fecha de vencimiento, días restantes, límite de dispositivos |
-| 📢 **Promoción** | Canal @Depwise2 y soporte @Dan3651 |
+| 📢 **Promoción** | Canal @DarkZsaid2 y soporte @DarkZsaid |
 | ⚠️ **Reglas** | Normas del servidor con advertencia de ban automático |
 
 ### Ejemplo del Banner (vista en HTTP Injector/Custom)
 
 <p align="center">
-  <img width="350" alt="Banner SSH Depwise" src="https://img.shields.io/badge/Formato-HTML%20VPN%20Apps-29b6f6?style=for-the-badge">
+  <img width="350" alt="Banner SSH DarkZsaid" src="https://img.shields.io/badge/Formato-HTML%20VPN%20Apps-29b6f6?style=for-the-badge">
 </p>
 
 ```text
@@ -94,7 +94,7 @@ Cada cuenta SSH ahora genera automáticamente un **banner HTML personalizado** q
 ⠀⠀⠈⣿⣿⡄⢀⣿⣿⠻⣿⣿⡀⢠⣿⣿⠁⠀⠀
 ⠀⠀⠀⠹⣿⣿⣾⣿⡏⠀⢹⣿⣷⣿⣿⠏⠀⠀⠀
 ⠀⠀⠀⠀⠙⢿⣿⡿⠀⠀⠀⢿⣿⡿⠋⠀⠀⠀⠀
-        DEPWISE       
+        DARKZSAID       
 ══════════════════════
  ⚡ INTERNET ILIMITADO ⚡
 ══════════════════════
@@ -104,15 +104,15 @@ Cada cuenta SSH ahora genera automáticamente un **banner HTML personalizado** q
  💻 Límite: 3
 ══════════════════════
  🔥 ¡SERVIDORES PREMIUM A 8.5 SOLES! 🔥
- 📢 Canal: @Depwise2
- 👤 Soporte: @Dan3651
+ 📢 Canal: @DarkZsaid2
+ 👤 Soporte: @DarkZsaid
 ══════════════════════
- ✅ CREADO EN : @Depwise_bot
+ ✅ CREADO EN : @DarkZsaid_bot
 ══════════════════════
 ```
 
 > [!NOTE]
-> El banner real usa **formato HTML con colores** (verde, cyan, amarillo, magenta). La vista anterior es una representación simplificada. En las apps VPN se ve con los colores del banner predeterminado de Depwise.
+> El banner real usa **formato HTML con colores** (verde, cyan, amarillo, magenta). La vista anterior es una representación simplificada. En las apps VPN se ve con los colores del banner predeterminado de DarkZsaid.
 
 ### ¿Cómo funciona?
 
@@ -169,7 +169,7 @@ Cada cuenta SSH ahora genera automáticamente un **banner HTML personalizado** q
 Ejecuta el siguiente comando en tu terminal como usuario **root**:
 
 ```bash
-bash <(curl -sL https://raw.githubusercontent.com/Depwisescript/BOT-TELEGRAM-VPN/main/install_go.sh)
+bash <(curl -sL https://raw.githubusercontent.com/DarkZsaidscript/BOT-TELEGRAM-VPN/main/install_go.sh)
 ```
 
 > [!IMPORTANT]
@@ -182,7 +182,7 @@ bash <(curl -sL https://raw.githubusercontent.com/Depwisescript/BOT-TELEGRAM-VPN
 Si ya tienes el bot funcionando y quieres recibir parches y nuevas funciones **sin perder usuarios ni configuraciones**:
 
 ```bash
-bash <(curl -sL https://raw.githubusercontent.com/Depwisescript/BOT-TELEGRAM-VPN/main/install_go.sh)
+bash <(curl -sL https://raw.githubusercontent.com/DarkZsaidscript/BOT-TELEGRAM-VPN/main/install_go.sh)
 ```
 
 > [!NOTE]
@@ -191,13 +191,13 @@ bash <(curl -sL https://raw.githubusercontent.com/Depwisescript/BOT-TELEGRAM-VPN
 ### Método alternativo (manual):
 
 ```bash
-systemctl stop depwise
+systemctl stop darkzsaid
 cd /tmp && rm -rf BOT-TELEGRAM-VPN
-git clone https://github.com/Depwisescript/BOT-TELEGRAM-VPN.git
+git clone https://github.com/DarkZsaidscript/BOT-TELEGRAM-VPN.git
 cd BOT-TELEGRAM-VPN
 export PATH=$PATH:/usr/local/go/bin
-go build -o /usr/local/bin/depwise-bot cmd/depwise/main.go
-systemctl restart depwise
+go build -o /usr/local/bin/darkzsaid-bot cmd/darkzsaid/main.go
+systemctl restart darkzsaid
 ```
 
 ---
@@ -214,7 +214,7 @@ El bot incluye un sistema de respaldos integrado con tu Google Drive personal. P
 ### Paso 1: Crear Proyecto en Google Cloud
 
 1. Ve a [Google Cloud Console](https://console.cloud.google.com/) e inicia sesión con tu Gmail.
-2. Crea un **nuevo proyecto** (o usa uno existente). Ponle un nombre como `DepwiseBackup`.
+2. Crea un **nuevo proyecto** (o usa uno existente). Ponle un nombre como `DarkZsaidBackup`.
 3. En el menú lateral, ve a **APIs y Servicios** → **Biblioteca**.
 4. Busca **"Google Drive API"** y haz clic en **Habilitar**.
 
@@ -223,7 +223,7 @@ El bot incluye un sistema de respaldos integrado con tu Google Drive personal. P
 1. Ve a **APIs y Servicios** → **Pantalla de consentimiento de OAuth**.
 2. Selecciona **Externo** como tipo de usuario y haz clic en **Crear**.
 3. Rellena solo los campos obligatorios:
-   - **Nombre de la aplicación:** `DepwiseBot`
+   - **Nombre de la aplicación:** `DarkZsaidBot`
    - **Correo de asistencia:** tu Gmail
    - **Correo del desarrollador:** tu Gmail
 4. Haz clic en **Guardar y Continuar** hasta llegar a **Usuarios de Prueba**.
@@ -236,23 +236,23 @@ El bot incluye un sistema de respaldos integrado con tu Google Drive personal. P
 1. Ve a **APIs y Servicios** → **Credenciales**.
 2. Haz clic en **+ Crear Credenciales** → **ID de cliente de OAuth**.
 3. En **Tipo de aplicación**, selecciona **Aplicación de escritorio**.
-4. Ponle un nombre (ej: `DepwiseBot`) y haz clic en **Crear**.
+4. Ponle un nombre (ej: `DarkZsaidBot`) y haz clic en **Crear**.
 5. Se mostrará un diálogo con tu **Client ID** y **Client Secret**.
 6. Haz clic en **⬇ Descargar JSON** para descargar el archivo de credenciales.
 
 ### Paso 4: Subir Credenciales al VPS
 
 1. Renombra el archivo descargado a exactamente: `credentials.json`
-2. Súbelo a tu VPS en la ruta: `/opt/depwise_bot/credentials.json`
+2. Súbelo a tu VPS en la ruta: `/opt/darkzsaid_bot/credentials.json`
 
 Puedes subirlo con `scp` desde tu PC:
 ```bash
-scp credentials.json root@TU_IP_VPS:/opt/depwise_bot/credentials.json
+scp credentials.json root@TU_IP_VPS:/opt/darkzsaid_bot/credentials.json
 ```
 
 O crearlo directamente en el VPS:
 ```bash
-nano /opt/depwise_bot/credentials.json
+nano /opt/darkzsaid_bot/credentials.json
 # Pega el contenido del JSON y guarda (Ctrl+O, Enter, Ctrl+X)
 ```
 
@@ -285,7 +285,7 @@ nano /opt/depwise_bot/credentials.json
 
 | Síntoma | Causa Probable | Solución |
 | :--- | :--- | :--- |
-| **El bot no responde** | OOM mató el proceso o token inválido | `systemctl status depwise` → `systemctl restart depwise` |
+| **El bot no responde** | OOM mató el proceso o token inválido | `systemctl status darkzsaid` → `systemctl restart darkzsaid` |
 | **Puerto 443 no responde tras reboot** | HAProxy caído o `/run/haproxy` borrado | Ver sección "Fix HAProxy" abajo |
 | **HTTP Injector no conecta (SSL/TLS)** | Backend apuntaba a Dropbear (2222) | Actualizar bot — fix incluido en v7.3 |
 | **Xray/VMess no conecta** | HAProxy o Xray no iniciaron | `systemctl status haproxy xray` |
@@ -337,16 +337,16 @@ echo -e "GET / HTTP/1.1\r\nHost: localhost\r\nUpgrade: websocket\r\nConnection: 
 
 ```bash
 # Estado del bot
-systemctl status depwise
+systemctl status darkzsaid
 
 # Logs en tiempo real
-journalctl -u depwise -f --no-pager -n 50
+journalctl -u darkzsaid -f --no-pager -n 50
 
 # Reiniciar bot
-systemctl restart depwise
+systemctl restart darkzsaid
 
 # Estado completo de servicios VPN
-for svc in depwise haproxy ssh-ws-internal xray ssh-ws; do
+for svc in darkzsaid haproxy ssh-ws-internal xray ssh-ws; do
   echo -n "$svc: "; systemctl is-active $svc 2>/dev/null || echo "not found"
 done
 
@@ -369,12 +369,12 @@ journalctl -u haproxy --no-pager -n 20
 
 Este proyecto es desarrollado y mantenido con pasión por:
 
-- **👨‍💻 Desarrollador:** [@Dan3651](https://t.me/Dan3651)
-- **📢 Canal Oficial:** [Depwise Channel](https://t.me/Depwise2)
+- **👨‍💻 Desarrollador:** [@DarkZsaid](https://t.me/Dan3651)
+- **📢 Canal Oficial:** [DarkZsaid Channel](https://t.me/DarkZsaid2)
 
 ---
 
 <p align="center">
   <i>"Potenciando tu VPS con la velocidad de Go."</i><br>
-  <b>© 2026 Depwise Project</b>
+  <b>© 2026 DarkZsaid Project</b>
 </p>

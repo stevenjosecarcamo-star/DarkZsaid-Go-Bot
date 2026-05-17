@@ -4,13 +4,13 @@ import (
 	"log"
 	"time"
 
-	"github.com/Depwisescript/BOT-TELEGRAM-VPN/internal/bot"
-	"github.com/Depwisescript/BOT-TELEGRAM-VPN/internal/db"
-	"github.com/Depwisescript/BOT-TELEGRAM-VPN/internal/drive"
+	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/bot"
+	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/db"
+	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/drive"
 )
 
 func main() {
-	log.Println("Iniciando Depwise SSH VPN Manager...")
+	log.Println("Iniciando DarkZsaid SSH VPN Manager...")
 
 	// Hilo de vigilancia de Backups (cada hora evalúa independientemente de reboots)
 	go func() {

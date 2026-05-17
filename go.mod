@@ -1,4 +1,4 @@
-module github.com/Depwisescript/BOT-TELEGRAM-VPN
+module github.com/DarkZsaidscript/BOT-TELEGRAM-VPN
 
 go 1.25.0
 

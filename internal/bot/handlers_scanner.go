@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Depwisescript/BOT-TELEGRAM-VPN/internal/sys"
+	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/sys"
 	tele "gopkg.in/telebot.v3"
 )
 
@@ -18,7 +18,7 @@ func handleMenuScanner(c tele.Context, b *tele.Bot) error {
 	if !assetOK || !httpxOK {
 		// Herramientas no instaladas
 		markup.Inline(markup.Row(btnBack))
-		texto := "🔍 <b>Depwise Scanner 🌐</b>\n\n"
+		texto := "🔍 <b>DarkZsaid Scanner 🌐</b>\n\n"
 		texto += "⚠️ <b>Herramientas no instaladas</b>\n\n"
 		if !assetOK {
 			texto += "❌ <b>assetfinder:</b> No instalado\n"
@@ -37,7 +37,7 @@ func handleMenuScanner(c tele.Context, b *tele.Bot) error {
 	btnStart := markup.Data("🔍 Iniciar Escaneo", "start_scanner_prompt")
 	markup.Inline(markup.Row(btnStart), markup.Row(btnBack))
 
-	texto := "🔍 <b>Depwise Scanner 🌐</b>\n\n"
+	texto := "🔍 <b>DarkZsaid Scanner 🌐</b>\n\n"
 	texto += "✅ <b>Herramientas listas</b>\n"
 	texto += "• assetfinder: ✅\n"
 	texto += "• httpx: ✅\n\n"

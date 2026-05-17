@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Depwisescript/BOT-TELEGRAM-VPN/internal/db"
-	"github.com/Depwisescript/BOT-TELEGRAM-VPN/internal/sys"
-	"github.com/Depwisescript/BOT-TELEGRAM-VPN/internal/vpn"
+	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/db"
+	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/sys"
+	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/vpn"
 	tele "gopkg.in/telebot.v3"
 )
 
@@ -107,8 +107,8 @@ func finishZivpnCreation(c tele.Context, password string, days int, chatID int64
 	}
 
 	res += "━━━━━━━━━━━━━━\n"
-	res += "📢 <b>Canal:</b> @Depwise2\n"
-	res += "👨‍💻 <b>Dev:</b> @Dan3651\n"
+	res += "📢 <b>Canal:</b> @DarkZsaid2\n"
+	res += "👨‍💻 <b>Dev:</b> @DarkZsaid\n"
 
 	markup := &tele.ReplyMarkup{}
 	markup.Inline(markup.Row(markup.Data("🔙 Volver", "back_main")))

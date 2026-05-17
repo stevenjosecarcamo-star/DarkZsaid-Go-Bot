@@ -49,7 +49,7 @@ func InstallSlowDNS(domain, port string) (string, error) {
 
     // Service Creation
     svc := `[Unit]
-Description=SlowDNS Depwise Service
+Description=SlowDNS DarkZsaid Service
 After=network.target
 
 [Service]
