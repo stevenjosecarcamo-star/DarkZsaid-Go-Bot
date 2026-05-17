@@ -3,3 +3,4 @@ bot_data.json
 .env
 *.exe
 vendor/
+bin/
