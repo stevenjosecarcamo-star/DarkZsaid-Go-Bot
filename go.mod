@@ -1,4 +1,4 @@
-module github.com/DarkZsaidscript/BOT-TELEGRAM-VPN
+module github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot
 
 go 1.25.0
 

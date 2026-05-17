@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/db"
+	"github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot/internal/db"
 )
 
 // PerformFullCleanup realiza una limpieza profunda del SSD

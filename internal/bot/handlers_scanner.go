@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/sys"
+	"github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot/internal/sys"
 	tele "gopkg.in/telebot.v3"
 )
 

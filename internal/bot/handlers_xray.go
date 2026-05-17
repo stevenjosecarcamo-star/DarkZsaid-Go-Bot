@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/db"
-	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/vpn"
+	"github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot/internal/db"
+	"github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot/internal/vpn"
 	"github.com/google/uuid"
 	tele "gopkg.in/telebot.v3"
 )

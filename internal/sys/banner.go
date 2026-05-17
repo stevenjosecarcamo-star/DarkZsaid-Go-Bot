@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/db"
+	"github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot/internal/db"
 )
 
 const (

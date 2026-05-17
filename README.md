@@ -169,7 +169,7 @@ Cada cuenta SSH ahora genera automáticamente un **banner HTML personalizado** q
 Ejecuta el siguiente comando en tu terminal como usuario **root**:
 
 ```bash
-bash <(curl -sL https://raw.githubusercontent.com/DarkZsaidscript/BOT-TELEGRAM-VPN/main/install_go.sh)
+bash <(curl -sL https://raw.githubusercontent.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot/main/install_go.sh)
 ```
 
 > [!IMPORTANT]
@@ -182,7 +182,7 @@ bash <(curl -sL https://raw.githubusercontent.com/DarkZsaidscript/BOT-TELEGRAM-V
 Si ya tienes el bot funcionando y quieres recibir parches y nuevas funciones **sin perder usuarios ni configuraciones**:
 
 ```bash
-bash <(curl -sL https://raw.githubusercontent.com/DarkZsaidscript/BOT-TELEGRAM-VPN/main/install_go.sh)
+bash <(curl -sL https://raw.githubusercontent.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot/main/install_go.sh)
 ```
 
 > [!NOTE]

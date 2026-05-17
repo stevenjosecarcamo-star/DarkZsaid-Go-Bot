@@ -23,17 +23,17 @@ func InstallProxyDT() error {
 	var mirrors []string
 	if arch == "arm64" || arch == "aarch64" {
 		mirrors = []string{
-			"https://raw.githubusercontent.com/DarkZsaidscript/PROXY-DT/928bb1af4211b874361bc65c210189a5922ccaa8/DT%201.2.3/arm64/proxy",
+			"https://raw.githubusercontent.com/Depwisescript/PROXY-DT/928bb1af4211b874361bc65c210189a5922ccaa8/DT%201.2.3/arm64/proxy",
 		}
 	} else if arch == "amd64" {
 		mirrors = []string{
-			"https://raw.githubusercontent.com/DarkZsaidscript/PROXY-DT/928bb1af4211b874361bc65c210189a5922ccaa8/DT%201.2.3/proxydt",
-			"https://raw.githubusercontent.com/DarkZsaidscript/PROXY-DT/928bb1af4211b874361bc65c210189a5922ccaa8/DT%201.2.3/x86/proxy",
+			"https://raw.githubusercontent.com/Depwisescript/PROXY-DT/928bb1af4211b874361bc65c210189a5922ccaa8/DT%201.2.3/proxydt",
+			"https://raw.githubusercontent.com/Depwisescript/PROXY-DT/928bb1af4211b874361bc65c210189a5922ccaa8/DT%201.2.3/x86/proxy",
 		}
 	} else {
 		mirrors = []string{
-			"https://raw.githubusercontent.com/DarkZsaidscript/PROXY-DT/928bb1af4211b874361bc65c210189a5922ccaa8/DT%201.2.3/x86/proxy",
-			"https://raw.githubusercontent.com/DarkZsaidscript/PROXY-DT/928bb1af4211b874361bc65c210189a5922ccaa8/DT%201.2.3/proxydt",
+			"https://raw.githubusercontent.com/Depwisescript/PROXY-DT/928bb1af4211b874361bc65c210189a5922ccaa8/DT%201.2.3/x86/proxy",
+			"https://raw.githubusercontent.com/Depwisescript/PROXY-DT/928bb1af4211b874361bc65c210189a5922ccaa8/DT%201.2.3/proxydt",
 		}
 	}
 

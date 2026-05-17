@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/db"
-	"github.com/DarkZsaidscript/BOT-TELEGRAM-VPN/internal/drive"
+	"github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot/internal/db"
+	"github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot/internal/drive"
 	tele "gopkg.in/telebot.v3"
 )
 
