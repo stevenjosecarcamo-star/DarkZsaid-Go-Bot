@@ -1,0 +1,9 @@
+[Unit]
+Description=Vigilar cambios en banners DarkZsaid
+
+[Path]
+PathChanged=/etc/ssh_banners
+PathModified=/etc/ssh_banners
+
+[Install]
+WantedBy=multi-user.target

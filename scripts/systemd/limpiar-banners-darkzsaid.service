@@ -1,0 +1,6 @@
+[Unit]
+Description=Limpiar logo W de banners DarkZsaid
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/limpiar-banners-darkzsaid.sh
