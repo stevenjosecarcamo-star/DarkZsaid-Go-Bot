@@ -157,11 +157,10 @@ func handleSubMenuFalcon(c tele.Context, b *tele.Bot) error {
 func handleSubMenuSSL(c tele.Context, b *tele.Bot) error {
 markup := &tele.ReplyMarkup{}
 btnInst := markup.Data("📥 Activar SSL 443", "install_ssl")
-btnTest := markup.Data("🧪 Probar SSL 443", "test_ssl443")
 btnUninst := markup.Data("🛑 Detener SSL 443", "uninstall_ssl")
 btnBack := markup.Data("🔙 Volver", "menu_protocols")
 
-markup.Inline(markup.Row(btnInst), markup.Row(btnTest), markup.Row(btnUninst), markup.Row(btnBack))
+markup.Inline(markup.Row(btnInst), markup.Row(btnUninst), markup.Row(btnBack))
 
 status := "❌ Desinstalado / Inactivo"
 if exec.Command("bash", "-c", "systemctl is-active --quiet stunnel4 && ss -tulnp 2>/dev/null | grep -q ':443'").Run() == nil {
@@ -1134,67 +1133,4 @@ return SafeEditCtx(c, b, fmt.Sprintf("⚠️ <b>Error al detener SSL 443:</b>\n<
 }
 
 return SafeEditCtx(c, b, "🛑 <b>SSL 443 independiente detenido.</b>", markup)
-}
-
-
-func handleTestSSL443(c tele.Context, b *tele.Bot) error {
-markup := &tele.ReplyMarkup{}
-markup.Inline(markup.Row(markup.Data("🔙 Volver", "submenu_ssl")))
-
-cmd := `
-echo "🧪 PRUEBA SSL 443 DESDE VPS"
-echo "━━━━━━━━━━━━━━━━━━━━"
-
-echo ""
-echo "🔐 SSH local:"
-if systemctl is-active --quiet ssh 2>/dev/null || systemctl is-active --quiet sshd 2>/dev/null; then
-  echo "✅ SSH activo en el servidor"
-else
-  echo "❌ SSH no aparece activo"
-fi
-
-echo ""
-echo "📡 Puerto 443:"
-if ss -tulnp 2>/dev/null | grep -q ':443'; then
-  echo "⚠️ Puerto 443 ocupado por:"
-  ss -tulnp 2>/dev/null | grep ':443'
-else
-  echo "✅ Puerto 443 libre para instalar SSL independiente"
-fi
-
-echo ""
-echo "📦 Paquete stunnel4:"
-if command -v stunnel4 >/dev/null 2>&1 || command -v stunnel >/dev/null 2>&1; then
-  echo "✅ stunnel disponible"
-else
-  echo "⚠️ stunnel4 no está instalado todavía"
-fi
-
-echo ""
-echo "🧾 Archivo de configuración:"
-if [ -f /etc/stunnel/darkzsaid-ssl443.conf ]; then
-  echo "✅ Existe /etc/stunnel/darkzsaid-ssl443.conf"
-else
-  echo "ℹ️ Aún no existe configuración SSL 443"
-fi
-
-echo ""
-echo "🚦 Estado servicio stunnel4:"
-systemctl is-active stunnel4 2>/dev/null || echo "inactive"
-
-echo "━━━━━━━━━━━━━━━━━━━━"
-echo "Resultado:"
-if ss -tulnp 2>/dev/null | grep -q ':443'; then
-  echo "El puerto 443 ya está ocupado. Si instalas SSL 443, primero habrá que apagar el servicio que usa ese puerto."
-else
-  echo "Puedes instalar SSL 443 independiente."
-fi
-`
-
-out, err := exec.Command("bash", "-lc", cmd).CombinedOutput()
-if err != nil {
-return SafeEditCtx(c, b, "❌ Error probando SSL 443:\n\n"+string(out), markup)
-}
-
-return SafeEditCtx(c, b, string(out), markup)
 }

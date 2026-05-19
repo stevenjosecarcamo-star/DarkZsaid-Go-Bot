@@ -206,7 +206,6 @@ func StartBot() {
 		return handleInstallFalcon(c, b, c.Message())
 	})
 	b.Handle(&tele.Btn{Unique: "install_ssl"}, func(c tele.Context) error { return handleInstallSSL443(c, b) })
-	b.Handle(&tele.Btn{Unique: "test_ssl443"}, func(c tele.Context) error { return handleTestSSL443(c, b) })
 	b.Handle(&tele.Btn{Unique: "install_dropbear"}, func(c tele.Context) error {
 		return handleInstallDropbear(c, b, c.Message())
 	})

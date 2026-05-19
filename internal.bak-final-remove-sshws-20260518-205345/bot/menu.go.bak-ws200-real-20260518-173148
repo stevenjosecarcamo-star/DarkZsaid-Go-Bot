@@ -154,7 +154,9 @@ func StartBot() {
 	b.Handle(&tele.Btn{Unique: "menu_crear"}, func(c tele.Context) error {
 		return SafeEditCtx(c, b, menuCrearText(), menuCrearMarkup())
 	})
-	b.Handle(&tele.Btn{Unique: "menu_info"}, func(c tele.Context) error { return handleMenuInfoClean(c, b) })
+	b.Handle(&tele.Btn{Unique: "menu_info"}, func(c tele.Context) error {
+		return handleInfo(c, b)
+	})
 	b.Handle(&tele.Btn{Unique: "menu_broadcast"}, func(c tele.Context) error {
 		return handleMenuBroadcast(c, b)
 	})
@@ -205,8 +207,9 @@ func StartBot() {
 	b.Handle(&tele.Btn{Unique: "install_falcon"}, func(c tele.Context) error {
 		return handleInstallFalcon(c, b, c.Message())
 	})
-	b.Handle(&tele.Btn{Unique: "install_ssl"}, func(c tele.Context) error { return handleInstallSSL443(c, b) })
-	b.Handle(&tele.Btn{Unique: "test_ssl443"}, func(c tele.Context) error { return handleTestSSL443(c, b) })
+	b.Handle(&tele.Btn{Unique: "install_ssl"}, func(c tele.Context) error {
+		return handleInstallSSL(c, b, c.Message())
+	})
 	b.Handle(&tele.Btn{Unique: "install_dropbear"}, func(c tele.Context) error {
 		return handleInstallDropbear(c, b, c.Message())
 	})
@@ -252,12 +255,12 @@ func StartBot() {
 	b.Handle(&tele.Btn{Unique: "uninstall_zivpn"}, func(c tele.Context) error { return handleUninstallProtocol(c, b, "ZiVPN") })
 	b.Handle(&tele.Btn{Unique: "uninstall_badvpn"}, func(c tele.Context) error { return handleUninstallProtocol(c, b, "BadVPN") })
 	b.Handle(&tele.Btn{Unique: "uninstall_falcon"}, func(c tele.Context) error { return handleUninstallProtocol(c, b, "Falcon") })
-	b.Handle(&tele.Btn{Unique: "uninstall_ssl"}, func(c tele.Context) error { return handleUninstallSSL443(c, b) })
+	b.Handle(&tele.Btn{Unique: "uninstall_ssl"}, func(c tele.Context) error { return handleUninstallProtocol(c, b, "SSL Tunnel") })
 	b.Handle(&tele.Btn{Unique: "uninstall_dropbear"}, func(c tele.Context) error { return handleUninstallProtocol(c, b, "Dropbear") })
 	b.Handle(&tele.Btn{Unique: "uninstall_proxydt"}, func(c tele.Context) error { return handleUninstallProtocol(c, b, "ProxyDT") })
 	b.Handle(&tele.Btn{Unique: "uninstall_udpcustom"}, func(c tele.Context) error { return handleUninstallUDPCustom(c, b) })
 	b.Handle(&tele.Btn{Unique: "install_sshws"}, func(c tele.Context) error { return handleInstallSSHWS(c, b) })
-	b.Handle(&tele.Btn{Unique: "uninstall_sshws"}, func(c tele.Context) error { return handleUninstallSSHWS200(c, b) })
+	b.Handle(&tele.Btn{Unique: "uninstall_sshws"}, func(c tele.Context) error { return handleUninstallProtocol(c, b, "SSH WebSocket") })
 	b.Handle(&tele.Btn{Unique: "uninstall_xray"}, func(c tele.Context) error { return handleUninstallProtocol(c, b, "Xray") })
 
 	// Callbacks Dinámicos (One-Tap Selection)
@@ -550,16 +553,16 @@ func buildMainMenuText(data *db.ConfigData) string {
 func buildMainMenuMarkup(chatID int64) *tele.ReplyMarkup {
 	menu := &tele.ReplyMarkup{}
 
-	btnCrear := menu.Data("👤 Crear SSH", "menu_crear")
-	btnInfo := menu.Data("📡 Info Servidor", "menu_info")
-	btnEditar := menu.Data("✏️ Editar SSH", "menu_editar")
-	btnDelete := menu.Data("🗑️ Eliminar SSH", "menu_eliminar")
-	btnInfoCuenta := menu.Data("ℹ️ Info Cuenta", "menu_info_cuenta")
+	btnCrear := menu.Data("🔐 Crear Cliente", "menu_crear")
+	btnInfo := menu.Data("📊 Estado VPS", "menu_info")
+	btnEditar := menu.Data("✏️ Editar Cliente", "menu_editar")
+	btnDelete := menu.Data("🗑️ Eliminar Cliente", "menu_eliminar")
+	btnInfoCuenta := menu.Data("ℹ️ Info Cliente", "menu_info_cuenta")
 	btnGlobal := menu.Data("📢 Mensaje Global", "menu_broadcast")
-	btnScanner := menu.Data("🔍 Escaner", "menu_scanner")
-	btnOnline := menu.Data("⚙️ Monitor Online", "menu_online")
-	btnProtocols := menu.Data("⚙️ Protocolos", "menu_protocols")
-	btnSettings := menu.Data("⚙️ Ajustes Pro", "menu_admins")
+	btnScanner := menu.Data("🔍 Escáner", "menu_scanner")
+	btnOnline := menu.Data("🟢 Clientes Online", "menu_online")
+	btnProtocols := menu.Data("🚀 Protocolos VPN", "menu_protocols")
+	btnSettings := menu.Data("🛠️ Ajustes Pro", "menu_admins")
 
 	data, _ := db.Load()
 	sa, _ := strconv.ParseInt(superAdmin, 10, 64)

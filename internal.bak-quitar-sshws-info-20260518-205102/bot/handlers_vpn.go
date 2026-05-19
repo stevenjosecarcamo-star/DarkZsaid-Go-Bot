@@ -32,7 +32,7 @@ func handleMenuProtocols(c tele.Context, b *tele.Bot) error {
 	btnFalcon := markup.Data("🦅 Falcon", "submenu_falcon")
 	btnSSL := markup.Data("📜 SSL Tunnel", "submenu_ssl")
 	btnDropbear := markup.Data("🐻 Dropbear", "submenu_dropbear")
-	btnSSHWS := markup.Data("🌐 SSH WebSocket", "submenu_sshws")
+	btnSSHWS := markup.Data("🚀 WebSocket 200 Established", "submenu_sshws")
 	btnXray := markup.Data("💎 Xray (VMess)", "submenu_xray")
 	btnScanner := markup.Data("🔍 Escaner", "submenu_scanner")
 	btnCancel := markup.Data("🔙 Volver", "back_main")
@@ -155,32 +155,21 @@ func handleSubMenuFalcon(c tele.Context, b *tele.Bot) error {
 }
 
 func handleSubMenuSSL(c tele.Context, b *tele.Bot) error {
-markup := &tele.ReplyMarkup{}
-btnInst := markup.Data("📥 Activar SSL 443", "install_ssl")
-btnTest := markup.Data("🧪 Probar SSL 443", "test_ssl443")
-btnUninst := markup.Data("🛑 Detener SSL 443", "uninstall_ssl")
-btnBack := markup.Data("🔙 Volver", "menu_protocols")
+	data, _ := db.Load()
+	status := "❌ Desinstalado"
+	if data.SSLTunnel != "" {
+		status = "✅ Instalado"
+	}
 
-markup.Inline(markup.Row(btnInst), markup.Row(btnTest), markup.Row(btnUninst), markup.Row(btnBack))
-
-status := "❌ Desinstalado / Inactivo"
-if exec.Command("bash", "-c", "systemctl is-active --quiet stunnel4 && ss -tulnp 2>/dev/null | grep -q ':443'").Run() == nil {
-status = "✅ Activo en puerto 443"
+	markup := &tele.ReplyMarkup{}
+	markup.Inline(
+		markup.Row(markup.Data("📥 Instalar", "install_ssl")),
+		markup.Row(markup.Data("🗑️ Desinstalar", "uninstall_ssl")),
+		markup.Row(markup.Data("🔙 Volver", "menu_protocols")),
+	)
+	texto := fmt.Sprintf("📜 <b>Gestión de SSL Tunnel (HAProxy)</b>\n\n📊 <b>Estado:</b> %s\n\n⚙️ Instala HAProxy multi-protocolo en puertos 443, 80, 8080\n🎮 <b>Requierido para juegos</b> (redirige WebSocket → SSH → BadVPN)\n\n¿Qué deseas hacer?", status)
+	return SafeEditCtx(c, b, texto, markup)
 }
-
-texto := "🔐 <b>Gestión SSL 443 Independiente</b>\n\n"
-texto += "📊 <b>Estado:</b> " + status + "\n\n"
-texto += "⚙️ <b>Servicio:</b> stunnel4\n"
-texto += "📡 <b>Puerto SSL:</b> <code>443</code>\n"
-texto += "🔐 <b>Destino:</b> SSH <code>127.0.0.1:22</code>\n\n"
-texto += "<i>Este módulo NO usa HAProxy, NO usa 80, NO usa 8080.</i>\n"
-texto += "<i>Es SSL 443 independiente.</i>\n\n"
-texto += "¿Qué deseas hacer?"
-
-return SafeEditCtx(c, b, texto, markup)
-}
-
-
 
 func handleSubMenuDropbear(c tele.Context, b *tele.Bot) error {
 	data, _ := db.Load()
@@ -217,24 +206,22 @@ texto := "🚀 <b>Gestión WebSocket 200 Established</b>\n\n"
 texto += "📊 <b>Estado:</b> " + status + "\n\n"
 texto += "⚙️ <b>Método:</b> HTTP/1.1 200 Connection established\n"
 texto += "📡 <b>Puerto principal:</b> <code>80</code>\n"
-texto += "🔐 <b>Destino:</b> SSH / Dropbear\n\n"
-texto += "<i>Este módulo es independiente y usa:</i>\n"
+texto += "🔐 <b>Destino:</b> SSH / Dropbear según configuración del panel\n\n"
+texto += "<i>Esta opción usa el módulo real del panel DarkZsaid:</i>\n"
 texto += "<code>/opt/darkzsaid/menus/socks_ws_200_establish_menu.sh</code>\n\n"
 texto += "¿Qué deseas hacer?"
 
 return SafeEditCtx(c, b, texto, markup)
 }
 
-
-
 func handleInstallSSHWS(c tele.Context, b *tele.Bot) error {
 markup := &tele.ReplyMarkup{}
 markup.Inline(markup.Row(markup.Data("🔙 Volver", "submenu_sshws")))
 
-SafeEditCtx(c, b, "⏳ <b>Activando WebSocket 200 Established...</b>\n\n<i>Preparando servicio independiente en puerto 80...</i>", markup)
+SafeEditCtx(c, b, "⏳ <b>Activando WebSocket 200 Established...</b>\n\n<i>Ejecutando módulo del panel DarkZsaid...</i>", markup)
 
-cmd := "bash /opt/darkzsaid/menus/socks_ws_200_establish_menu.sh install"
-out, err := exec.Command("bash", "-lc", cmd).CombinedOutput()
+cmd := "printf '1\\n\\n' | bash /opt/darkzsaid/menus/socks_ws_200_establish_menu.sh"
+out, err := exec.Command("bash", "-c", cmd).CombinedOutput()
 
 if err != nil {
 return SafeEditCtx(c, b, fmt.Sprintf("❌ <b>Error al activar WebSocket 200:</b>\n<pre>%v</pre>\n\n<pre>%s</pre>", err, string(out)), markup)
@@ -249,12 +236,10 @@ res += "📡 <b>Puerto:</b> <code>80</code>\n"
 res += "⚙️ <b>Respuesta:</b> <code>HTTP/1.1 200 Connection established</code>\n"
 res += "🔐 <b>Modo:</b> SSH / Dropbear vía WebSocket 200\n"
 res += "━━━━━━━━━━━━━━\n"
-res += "<i>Compatible con payload WebSocket 200 Established.</i>"
+res += "<i>Compatible con apps que usen payload WebSocket 200 Established.</i>"
 
 return SafeEditCtx(c, b, res, markup)
 }
-
-
 
 func handleSubMenuProxyDT(c tele.Context, b *tele.Bot) error {
 	markup := &tele.ReplyMarkup{}
@@ -1088,113 +1073,12 @@ func handleUninstallSSHWS200(c tele.Context, b *tele.Bot) error {
 markup := &tele.ReplyMarkup{}
 markup.Inline(markup.Row(markup.Data("🔙 Volver", "submenu_sshws")))
 
-cmd := "bash /opt/darkzsaid/menus/socks_ws_200_establish_menu.sh stop"
-out, err := exec.Command("bash", "-lc", cmd).CombinedOutput()
+cmd := "systemctl stop darkzsaid-ws-direct 2>/dev/null || true; systemctl stop socks-ws-200 2>/dev/null || true; systemctl stop ssh-ws-direct 2>/dev/null || true; pkill -f ssh-ws-direct.py 2>/dev/null || true; pkill -f socks-python-ws.py 2>/dev/null || true"
+out, err := exec.Command("bash", "-c", cmd).CombinedOutput()
 
 if err != nil {
-return SafeEditCtx(c, b, fmt.Sprintf("⚠️ <b>Error al detener WebSocket 200:</b>\n<pre>%v</pre>\n\n<pre>%s</pre>", err, string(out)), markup)
+return SafeEditCtx(c, b, fmt.Sprintf("⚠️ <b>WebSocket 200 detenido con advertencias:</b>\n<pre>%v</pre>\n<pre>%s</pre>", err, string(out)), markup)
 }
 
-return SafeEditCtx(c, b, "🛑 <b>WebSocket 200 Established detenido.</b>\n\nEl servicio fue apagado correctamente.", markup)
-}
-
-
-func handleInstallSSL443(c tele.Context, b *tele.Bot) error {
-markup := &tele.ReplyMarkup{}
-markup.Inline(markup.Row(markup.Data("🔙 Volver", "submenu_ssl")))
-
-SafeEditCtx(c, b, "⏳ <b>Activando SSL 443 independiente...</b>\n\n<i>Instalando stunnel4 en puerto 443...</i>", markup)
-
-out, err := exec.Command("bash", "-lc", "bash /opt/darkzsaid/menus/ssl_443_independent_menu.sh install").CombinedOutput()
-if err != nil {
-return SafeEditCtx(c, b, fmt.Sprintf("❌ <b>Error al activar SSL 443:</b>\n<pre>%v</pre>\n\n<pre>%s</pre>", err, string(out)), markup)
-}
-
-ip := sys.GetPublicIP()
-
-res := "✅ <b>SSL 443 Independiente Activado</b>\n"
-res += "━━━━━━━━━━━━━━\n"
-res += "🌐 <b>IP:</b> <code>" + ip + "</code>\n"
-res += "📡 <b>Puerto:</b> <code>443</code>\n"
-res += "🔐 <b>Servicio:</b> stunnel4\n"
-res += "🎯 <b>Destino:</b> SSH 127.0.0.1:22\n"
-res += "━━━━━━━━━━━━━━\n"
-res += "<i>Listo para conexión SSL/TLS por puerto 443.</i>"
-
-return SafeEditCtx(c, b, res, markup)
-}
-
-func handleUninstallSSL443(c tele.Context, b *tele.Bot) error {
-markup := &tele.ReplyMarkup{}
-markup.Inline(markup.Row(markup.Data("🔙 Volver", "submenu_ssl")))
-
-out, err := exec.Command("bash", "-lc", "bash /opt/darkzsaid/menus/ssl_443_independent_menu.sh stop").CombinedOutput()
-if err != nil {
-return SafeEditCtx(c, b, fmt.Sprintf("⚠️ <b>Error al detener SSL 443:</b>\n<pre>%v</pre>\n\n<pre>%s</pre>", err, string(out)), markup)
-}
-
-return SafeEditCtx(c, b, "🛑 <b>SSL 443 independiente detenido.</b>", markup)
-}
-
-
-func handleTestSSL443(c tele.Context, b *tele.Bot) error {
-markup := &tele.ReplyMarkup{}
-markup.Inline(markup.Row(markup.Data("🔙 Volver", "submenu_ssl")))
-
-cmd := `
-echo "🧪 PRUEBA SSL 443 DESDE VPS"
-echo "━━━━━━━━━━━━━━━━━━━━"
-
-echo ""
-echo "🔐 SSH local:"
-if systemctl is-active --quiet ssh 2>/dev/null || systemctl is-active --quiet sshd 2>/dev/null; then
-  echo "✅ SSH activo en el servidor"
-else
-  echo "❌ SSH no aparece activo"
-fi
-
-echo ""
-echo "📡 Puerto 443:"
-if ss -tulnp 2>/dev/null | grep -q ':443'; then
-  echo "⚠️ Puerto 443 ocupado por:"
-  ss -tulnp 2>/dev/null | grep ':443'
-else
-  echo "✅ Puerto 443 libre para instalar SSL independiente"
-fi
-
-echo ""
-echo "📦 Paquete stunnel4:"
-if command -v stunnel4 >/dev/null 2>&1 || command -v stunnel >/dev/null 2>&1; then
-  echo "✅ stunnel disponible"
-else
-  echo "⚠️ stunnel4 no está instalado todavía"
-fi
-
-echo ""
-echo "🧾 Archivo de configuración:"
-if [ -f /etc/stunnel/darkzsaid-ssl443.conf ]; then
-  echo "✅ Existe /etc/stunnel/darkzsaid-ssl443.conf"
-else
-  echo "ℹ️ Aún no existe configuración SSL 443"
-fi
-
-echo ""
-echo "🚦 Estado servicio stunnel4:"
-systemctl is-active stunnel4 2>/dev/null || echo "inactive"
-
-echo "━━━━━━━━━━━━━━━━━━━━"
-echo "Resultado:"
-if ss -tulnp 2>/dev/null | grep -q ':443'; then
-  echo "El puerto 443 ya está ocupado. Si instalas SSL 443, primero habrá que apagar el servicio que usa ese puerto."
-else
-  echo "Puedes instalar SSL 443 independiente."
-fi
-`
-
-out, err := exec.Command("bash", "-lc", cmd).CombinedOutput()
-if err != nil {
-return SafeEditCtx(c, b, "❌ Error probando SSL 443:\n\n"+string(out), markup)
-}
-
-return SafeEditCtx(c, b, string(out), markup)
+return SafeEditCtx(c, b, "🛑 <b>WebSocket 200 Established detenido.</b>\n\nEl servicio/proceso fue apagado si estaba activo.", markup)
 }

@@ -134,6 +134,7 @@ backend ssh_backend
 `
 
 // InstallSSLTunnel instala HAProxy con configuración multi-protocolo.
+// IMPORTANTE: Requiere que SSH WebSocket esté instalado en puerto 10015 primero.
 func InstallSSLTunnel(port string) error {
 	// 1. Instalar HAProxy
 	exec.Command("apt-get", "update").Run()
@@ -184,6 +185,7 @@ func InstallSSLTunnel(port string) error {
 		return fmt.Errorf("fallo escribir haproxy.cfg: %v", err)
 	}
 
+	// 7. Crear servicio SSH WebSocket interno (puerto 10015) si no existe
 	if exec.Command("systemctl", "is-active", "--quiet", "ssh-ws-internal.service").Run() != nil {
 		installSSHWSInternal()
 	}
@@ -205,11 +207,13 @@ func InstallSSLTunnel(port string) error {
 	return nil
 }
 
+// installSSHWSInternal instala el proxy SSH WebSocket interno en puerto 10015
 // Este es el servicio al que HAProxy redirige las conexiones WebSocket.
 func installSSHWSInternal() {
 	_ = exec.Command("apt-get", "install", "-y", "-qq", "python3").Run()
 
 	proxyCode := `#!/usr/bin/env python3
+"""SSH WebSocket Proxy (interno para HAProxy) - Puerto 10015"""
 import asyncio, sys, ssl, signal, os
 BUFFER_SIZE = 65536
 SSH_HOST = "127.0.0.1"
@@ -268,6 +272,7 @@ if __name__ == "__main__": main()
 	os.WriteFile(proxyScript, []byte(proxyCode), 0755)
 
 	svc := `[Unit]
+Description=SSH WebSocket Proxy Internal (Puerto 10015 para HAProxy)
 After=network.target sshd.service
 Wants=sshd.service
 

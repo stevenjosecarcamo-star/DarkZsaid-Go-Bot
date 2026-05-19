@@ -54,6 +54,7 @@ func InstallSSHWebSocket() error {
 
 	// 3. Servicio ssh-ws (puerto 10015 → SSH)
 	svcWS := `[Unit]
+Description=SSH WebSocket Proxy (Puerto 10015)
 After=network.target sshd.service
 Wants=sshd.service
 
@@ -75,6 +76,7 @@ WantedBy=multi-user.target`
 	// 4. Servicio ssh-ws-pro (puerto 2082 → SSH)
 	if _, err := os.Stat(sshWsProBin); err == nil {
 		svcWSPro := `[Unit]
+Description=SSH WebSocket Pro Proxy (Puerto 2082)
 After=network.target sshd.service
 Wants=sshd.service
 
@@ -135,6 +137,7 @@ func installSSHWebSocketPython() error {
 	}
 
 	proxyCode := `#!/usr/bin/env python3
+"""SSH WebSocket Proxy v2.0 (Raw TCP)"""
 import asyncio, sys, ssl, signal, os
 BUFFER_SIZE = 65536
 SSH_HOST = "127.0.0.1"
@@ -193,6 +196,7 @@ if __name__ == "__main__": main()
 	os.WriteFile(proxyScript, []byte(proxyCode), 0755)
 
 	svcWS := `[Unit]
+Description=SSH WebSocket Python Proxy (Puerto 80)
 After=network.target sshd.service
 [Service]
 Type=simple
@@ -212,6 +216,7 @@ WantedBy=multi-user.target`
 	return nil
 }
 
+// RemoveSSHWebSocket detiene y elimina los servicios SSH WebSocket
 func RemoveSSHWebSocket() error {
 	exec.Command("systemctl", "stop", sshWsSvc+".service").Run()
 	exec.Command("systemctl", "stop", sshWsProSvc+".service").Run()
