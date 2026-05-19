@@ -27,12 +27,12 @@ func GenerateUserBanner(username, title string, limit int, expireDate string, da
 		title = "INTERNET ILIMITADO"
 	}
 
-	promoText := "🔥 ¡SERVIDORES PREMIUM A 8.5 SOLES! 🔥"
+	promoText := "🔥 ¡SERVIDORES PREMIUM 200 CÓRDOBAS! 🔥"
 	if data != nil && data.BannerPromoText != "" {
 		promoText = data.BannerPromoText
 	}
 
-	promoChannel := "@DarkZsaid2"
+	promoChannel := "@DarkZsaid"
 	if data != nil && data.BannerPromoChannel != "" {
 		promoChannel = data.BannerPromoChannel
 	}
@@ -42,7 +42,7 @@ func GenerateUserBanner(username, title string, limit int, expireDate string, da
 		promoSupport = data.BannerPromoSupport
 	}
 
-	promoBotName := "@DarkZsaid_bot"
+	promoBotName := "@DarkZsaid"
 	if data != nil && data.BannerPromoBotName != "" {
 		promoBotName = data.BannerPromoBotName
 	}

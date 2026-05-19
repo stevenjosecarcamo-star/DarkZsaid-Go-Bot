@@ -497,7 +497,7 @@ func handleStart(c tele.Context, b *tele.Bot) error {
 			"🛠️ <b>¿NECESITAS UN SCRIPT A MEDIDA?</b>\n" +
 			"Desarrollamos bots y herramientas personalizadas para tu proyecto.\n" +
 			"━━━━━━━━━━━━━━\n" +
-			"📢 <b>Canal Oficial:</b> @DarkZsaid2\n" +
+			"📢 <b>Canal Oficial:</b> @DarkZsaid\n" +
 			"👤 <b>Soporte / Compras:</b> @DarkZsaid"
 
 		if c.Callback() != nil {

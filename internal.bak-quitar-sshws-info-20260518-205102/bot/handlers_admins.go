@@ -295,7 +295,7 @@ const defaultBanner = `<html>
 </h5>
 <h5 style="text-align:center;">
 <font color='#ffffff'>Dev: </font><a href="https://t.me/Dan3651"><font color='#f1c40f'>@DarkZsaid</font></a>
-<font color='#ffffff'>Canal: </font><a href="https://t.me/DarkZsaid2"><font color='#f1c40f'>@DarkZsaid2</font></a>
+<font color='#ffffff'>Canal: </font><a href="https://t.me/DarkZsaid2"><font color='#f1c40f'>@DarkZsaid</font></a>
 </h5>
 <h4 style="text-align:center;">
 <font color='#FF00FF'><b>🔥 ¡SE VENDEN SERVIDORES PREMIUM 35 DÍAS A 8.5 SOLES! 🔥</b></font>
@@ -313,7 +313,7 @@ const defaultBanner = `<html>
 <font color='#ff5252'><i>El incumplimiento genera ban automático</i></font>
 </h6>
 <h5 style="text-align:center;">
-<font color='#00e676'><b>CREADO EN : @DarkZsaid_bot</b></font>
+<font color='#00e676'><b>CREADO EN : @DarkZsaid</b></font>
 </h5>
 </html>`
 
@@ -349,12 +349,12 @@ func handleEditBannerPrompt(c tele.Context, b *tele.Bot) error {
 func handleEditPromoMenu(c tele.Context, b *tele.Bot) error {
 	data, _ := db.Load()
 
-	promoText := "🔥 ¡SERVIDORES PREMIUM A 8.5 SOLES! 🔥"
+	promoText := "🔥 ¡SERVIDORES PREMIUM 200 CÓRDOBAS! 🔥"
 	if data.BannerPromoText != "" {
 		promoText = data.BannerPromoText
 	}
 
-	promoChannel := "@DarkZsaid2"
+	promoChannel := "@DarkZsaid"
 	if data.BannerPromoChannel != "" {
 		promoChannel = data.BannerPromoChannel
 	}
@@ -364,7 +364,7 @@ func handleEditPromoMenu(c tele.Context, b *tele.Bot) error {
 		promoSupport = data.BannerPromoSupport
 	}
 
-	promoBotName := "@DarkZsaid_bot"
+	promoBotName := "@DarkZsaid"
 	if data.BannerPromoBotName != "" {
 		promoBotName = data.BannerPromoBotName
 	}

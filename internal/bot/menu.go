@@ -453,6 +453,8 @@ func SafeEdit(chatID int64, b *tele.Bot, msg *tele.Message, text string, markup 
 
 // SafeEditCtx es un helper que facilita el uso de SafeEdit con tele.Context
 func SafeEditCtx(c tele.Context, b *tele.Bot, text string, markup *tele.ReplyMarkup) error {
+	text = cleanBrailleText(text)
+
 	var lastMsg *tele.Message
 	if c.Callback() != nil {
 		lastMsg = c.Message()
@@ -494,7 +496,7 @@ func handleStart(c tele.Context, b *tele.Bot) error {
 			"🛠️ <b>¿NECESITAS UN SCRIPT A MEDIDA?</b>\n" +
 			"Desarrollamos bots y herramientas personalizadas para tu proyecto.\n" +
 			"━━━━━━━━━━━━━━\n" +
-			"📢 <b>Canal Oficial:</b> @DarkZsaid2\n" +
+			"📢 <b>Canal Oficial:</b> @DarkZsaid\n" +
 			"👤 <b>Soporte / Compras:</b> @DarkZsaid"
 
 		if c.Callback() != nil {

@@ -1,0 +1,626 @@
+package bot
+
+import (
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+	"sync"
+	"time"
+
+	"github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot/internal/db"
+	"github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot/internal/sys"
+	"github.com/stevenjosecarcamo-star/DarkZsaid-Go-Bot/internal/vpn"
+	tele "gopkg.in/telebot.v3"
+)
+
+var (
+	botToken   = os.Getenv("BOT_TOKEN")
+	superAdmin = os.Getenv("SUPER_ADMIN")
+
+	// Estado Global de Conversación (Sincronizado)
+	stateMu    sync.RWMutex
+	UserSteps  = make(map[int64]string)
+	TempData   = make(map[int64]map[string]string)
+	LastBotMsg = make(map[int64]*tele.Message)
+)
+
+func GetUserStep(chatID int64) string {
+	stateMu.RLock()
+	defer stateMu.RUnlock()
+	return UserSteps[chatID]
+}
+
+func GetUserStepWithOk(chatID int64) (string, bool) {
+	stateMu.RLock()
+	defer stateMu.RUnlock()
+	step, ok := UserSteps[chatID]
+	return step, ok
+}
+
+func SetUserStep(chatID int64, step string) {
+	stateMu.Lock()
+	defer stateMu.Unlock()
+	UserSteps[chatID] = step
+}
+
+func DeleteUserStep(chatID int64) {
+	stateMu.Lock()
+	defer stateMu.Unlock()
+	delete(UserSteps, chatID)
+	delete(TempData, chatID)
+	delete(LastBotMsg, chatID)
+}
+
+func GetTempData(chatID int64) map[string]string {
+	stateMu.RLock()
+	defer stateMu.RUnlock()
+	return TempData[chatID]
+}
+
+func SetTempData(chatID int64, data map[string]string) {
+	stateMu.Lock()
+	defer stateMu.Unlock()
+	TempData[chatID] = data
+}
+
+func GetTempValue(chatID int64, key string) string {
+	stateMu.RLock()
+	defer stateMu.RUnlock()
+	if TempData[chatID] == nil {
+		return ""
+	}
+	return TempData[chatID][key]
+}
+
+func SetTempValue(chatID int64, key, value string) {
+	stateMu.Lock()
+	defer stateMu.Unlock()
+	if TempData[chatID] == nil {
+		TempData[chatID] = make(map[string]string)
+	}
+	TempData[chatID][key] = value
+}
+
+func GetLastBotMsg(chatID int64) *tele.Message {
+	stateMu.RLock()
+	defer stateMu.RUnlock()
+	return LastBotMsg[chatID]
+}
+
+func SetLastBotMsg(chatID int64, msg *tele.Message) {
+	stateMu.Lock()
+	defer stateMu.Unlock()
+	LastBotMsg[chatID] = msg
+}
+
+// StartBot inicializa el bot de Telegram y registra los handlers
+func StartBot() {
+	if botToken == "" || superAdmin == "" {
+		log.Fatal("Variables BOT_TOKEN y SUPER_ADMIN son requeridas")
+	}
+
+	pref := tele.Settings{
+		Token:  botToken,
+		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
+	}
+
+	b, err := tele.NewBot(pref)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	// Middleware de Baneo
+	b.Use(func(next tele.HandlerFunc) tele.HandlerFunc {
+		return func(c tele.Context) error {
+			if c.Sender() != nil {
+				chatID := fmt.Sprintf("%d", c.Sender().ID)
+				data, errLoad := db.Load()
+				if errLoad == nil {
+					if info, banned := data.BannedUsers[chatID]; banned {
+						// Ignorar si es SuperAdmin (protección extra)
+						if !isSuperAdminID(c.Sender().ID) {
+							if c.Callback() != nil {
+								return c.Respond(&tele.CallbackResponse{
+									Text:      "🚫 ESTÁS BANEADO: " + info.Reason,
+									ShowAlert: true,
+								})
+							}
+							return c.Send("🚫 <b>ESTÁS BANEADO</b>\n\nMotivo: <i>" + info.Reason + "</i>", tele.ModeHTML)
+						}
+					}
+				}
+			}
+			return next(c)
+		}
+	})
+
+	// Handlers
+	b.Handle("/start", func(c tele.Context) error {
+		return handleStart(c, b)
+	})
+
+	b.Handle("/menu", func(c tele.Context) error {
+		return handleStart(c, b)
+	})
+
+	// Text Interceptor para conversacion
+	b.Handle(tele.OnText, func(c tele.Context) error {
+		return handleTextInputs(c, b)
+	})
+
+	// Opciones del Menú Principal
+	b.Handle(&tele.Btn{Unique: "menu_crear"}, func(c tele.Context) error {
+		return SafeEditCtx(c, b, menuCrearText(), menuCrearMarkup())
+	})
+	b.Handle(&tele.Btn{Unique: "menu_info"}, func(c tele.Context) error { return handleMenuInfoClean(c, b) })
+	b.Handle(&tele.Btn{Unique: "menu_broadcast"}, func(c tele.Context) error {
+		return handleMenuBroadcast(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "menu_scanner"}, func(c tele.Context) error {
+		return handleMenuScanner(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "menu_eliminar"}, func(c tele.Context) error {
+		return handleMenuEliminar(c, b)
+	})
+
+	// Opciones de Configuración Avanzada
+	b.Handle(&tele.Btn{Unique: "menu_info_cuenta"}, func(c tele.Context) error {
+		return handleMenuInfoCuenta(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "menu_editar"}, func(c tele.Context) error {
+		return handleMenuEditar(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "edit_pass"}, func(c tele.Context) error {
+		return HandleEditPass(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "edit_renew"}, func(c tele.Context) error {
+		return HandleEditRenew(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "edit_limit"}, func(c tele.Context) error {
+		return HandleEditLimit(c, b)
+	})
+
+	b.Handle(&tele.Btn{Unique: "menu_protocols"}, func(c tele.Context) error {
+		return handleMenuProtocols(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "menu_admins"}, func(c tele.Context) error {
+		return handleMenuAdmins(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "menu_online"}, func(c tele.Context) error {
+		return handleMenuOnline(c, b)
+	})
+
+	// VPNs
+	b.Handle(&tele.Btn{Unique: "install_slowdns"}, func(c tele.Context) error {
+		return handleInstallSlowDNS(c, b, c.Message())
+	})
+	b.Handle(&tele.Btn{Unique: "install_zivpn"}, func(c tele.Context) error {
+		return handleInstallZivpn(c, b, c.Message())
+	})
+	b.Handle(&tele.Btn{Unique: "install_badvpn"}, func(c tele.Context) error {
+		return handleInstallBadVPN(c, b, c.Message())
+	})
+	b.Handle(&tele.Btn{Unique: "install_falcon"}, func(c tele.Context) error {
+		return handleInstallFalcon(c, b, c.Message())
+	})
+	b.Handle(&tele.Btn{Unique: "install_ssl"}, func(c tele.Context) error { return handleInstallSSL443(c, b) })
+	b.Handle(&tele.Btn{Unique: "test_ssl443"}, func(c tele.Context) error { return handleTestSSL443(c, b) })
+	b.Handle(&tele.Btn{Unique: "install_dropbear"}, func(c tele.Context) error {
+		return handleInstallDropbear(c, b, c.Message())
+	})
+	b.Handle(&tele.Btn{Unique: "install_proxydt"}, func(c tele.Context) error {
+		return handleInstallProxyDT(c, b, c.Message())
+	})
+	b.Handle(&tele.Btn{Unique: "install_udpcustom"}, func(c tele.Context) error {
+		return handleInstallUDPCustom(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "install_scanner_deps"}, func(c tele.Context) error {
+		return handleInstallScannerAll(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "submenu_scanner"}, func(c tele.Context) error {
+		return handleSubMenuScanner(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "install_scanner_all"}, func(c tele.Context) error {
+		return handleInstallScannerAll(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "uninstall_scanner_all"}, func(c tele.Context) error {
+		return handleUninstallScannerAll(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "install_xray"}, func(c tele.Context) error {
+		return handleInstallXray(c, b, c.Message())
+	})
+
+	// Sub-Menús de Protocolos
+	b.Handle(&tele.Btn{Unique: "submenu_slowdns"}, func(c tele.Context) error { return handleSubMenuSlowDNS(c, b) })
+	b.Handle(&tele.Btn{Unique: "submenu_zivpn"}, func(c tele.Context) error { return handleSubMenuZiVPN(c, b) })
+	b.Handle(&tele.Btn{Unique: "submenu_badvpn"}, func(c tele.Context) error { return handleSubMenuBadVPN(c, b) })
+	b.Handle(&tele.Btn{Unique: "submenu_falcon"}, func(c tele.Context) error { return handleSubMenuFalcon(c, b) })
+	b.Handle(&tele.Btn{Unique: "submenu_ssl"}, func(c tele.Context) error { return handleSubMenuSSL(c, b) })
+	b.Handle(&tele.Btn{Unique: "submenu_dropbear"}, func(c tele.Context) error { return handleSubMenuDropbear(c, b) })
+	b.Handle(&tele.Btn{Unique: "submenu_proxydt"}, func(c tele.Context) error { return handleSubMenuProxyDT(c, b) })
+	b.Handle(&tele.Btn{Unique: "submenu_udpcustom"}, func(c tele.Context) error { return handleSubMenuUDPCustom(c, b) })
+	b.Handle(&tele.Btn{Unique: "submenu_sshws"}, func(c tele.Context) error { return handleSubMenuSSHWS(c, b) })
+	b.Handle(&tele.Btn{Unique: "submenu_xray"}, func(c tele.Context) error { return handleSubMenuXray(c, b) })
+	b.Handle(&tele.Btn{Unique: "manage_xray_users"}, func(c tele.Context) error { return handleManageXrayUsers(c, b) })
+	b.Handle(&tele.Btn{Unique: "protocol_diag"}, func(c tele.Context) error { return handleProtocolDiag(c, b) })
+	b.Handle(&tele.Btn{Unique: "menu_protocols"}, func(c tele.Context) error { return handleMenuProtocols(c, b) })
+
+	// Desinstaladores
+	b.Handle(&tele.Btn{Unique: "uninstall_slowdns"}, func(c tele.Context) error { return handleUninstallProtocol(c, b, "SlowDNS") })
+	b.Handle(&tele.Btn{Unique: "uninstall_zivpn"}, func(c tele.Context) error { return handleUninstallProtocol(c, b, "ZiVPN") })
+	b.Handle(&tele.Btn{Unique: "uninstall_badvpn"}, func(c tele.Context) error { return handleUninstallProtocol(c, b, "BadVPN") })
+	b.Handle(&tele.Btn{Unique: "uninstall_falcon"}, func(c tele.Context) error { return handleUninstallProtocol(c, b, "Falcon") })
+	b.Handle(&tele.Btn{Unique: "uninstall_ssl"}, func(c tele.Context) error { return handleUninstallSSL443(c, b) })
+	b.Handle(&tele.Btn{Unique: "uninstall_dropbear"}, func(c tele.Context) error { return handleUninstallProtocol(c, b, "Dropbear") })
+	b.Handle(&tele.Btn{Unique: "uninstall_proxydt"}, func(c tele.Context) error { return handleUninstallProtocol(c, b, "ProxyDT") })
+	b.Handle(&tele.Btn{Unique: "uninstall_udpcustom"}, func(c tele.Context) error { return handleUninstallUDPCustom(c, b) })
+	b.Handle(&tele.Btn{Unique: "install_sshws"}, func(c tele.Context) error { return handleInstallSSHWS(c, b) })
+	b.Handle(&tele.Btn{Unique: "uninstall_sshws"}, func(c tele.Context) error { return handleUninstallSSHWS200(c, b) })
+	b.Handle(&tele.Btn{Unique: "uninstall_xray"}, func(c tele.Context) error { return handleUninstallProtocol(c, b, "Xray") })
+
+	// Callbacks Dinámicos (One-Tap Selection)
+	b.Handle("\fed_user:", func(c tele.Context) error { return handleEditSelection(c, b) })
+	b.Handle("\fdel_confirm:", func(c tele.Context) error { return handleDeleteSelection(c, b) })
+	b.Handle("\fdel_adm_exec", func(c tele.Context) error { return handleDelAdminExec(c, b) })
+	b.Handle("\fdel_xray_exec", func(c tele.Context) error { return handleDeleteXrayExec(c, b) })
+	b.Handle("\frename_adm_sel", func(c tele.Context) error { return handleRenameAdminSelect(c, b) })
+	b.Handle("\funban_user", func(c tele.Context) error { return handleUnbanUser(c, b) })
+	b.Handle(&tele.Btn{Unique: "rename_admin_menu"}, func(c tele.Context) error { return handleRenameAdminMenu(c, b) })
+
+	// Ajustes Pro
+	b.Handle(&tele.Btn{Unique: "toggle_public_access"}, func(c tele.Context) error { return handleTogglePublicAccess(c, b) })
+	b.Handle(&tele.Btn{Unique: "list_admins"}, func(c tele.Context) error { return handleListAdmins(c, b) })
+	b.Handle(&tele.Btn{Unique: "add_admin"}, func(c tele.Context) error { return handleAddAdminPrompt(c, b) })
+	b.Handle(&tele.Btn{Unique: "del_admin_menu"}, func(c tele.Context) error { return handleDelAdminMenu(c, b) })
+	b.Handle(&tele.Btn{Unique: "edit_extrainfo"}, func(c tele.Context) error { return handleEditExtraInfoPrompt(c, b) })
+	b.Handle(&tele.Btn{Unique: "edit_cloudflare"}, func(c tele.Context) error { return handleEditCloudflarePrompt(c, b) })
+	b.Handle(&tele.Btn{Unique: "edit_cloudfront"}, func(c tele.Context) error { return handleEditCloudfrontPrompt(c, b) })
+	b.Handle(&tele.Btn{Unique: "edit_banner"}, func(c tele.Context) error { return handleEditBannerPrompt(c, b) })
+	b.Handle(&tele.Btn{Unique: "edit_promo_menu"}, func(c tele.Context) error { return handleEditPromoMenu(c, b) })
+	b.Handle(&tele.Btn{Unique: "edit_promo_text"}, func(c tele.Context) error { return handleEditPromoText(c, b) })
+	b.Handle(&tele.Btn{Unique: "edit_promo_channel"}, func(c tele.Context) error { return handleEditPromoChannel(c, b) })
+	b.Handle(&tele.Btn{Unique: "edit_promo_support"}, func(c tele.Context) error { return handleEditPromoSupport(c, b) })
+	b.Handle(&tele.Btn{Unique: "edit_promo_botname"}, func(c tele.Context) error { return handleEditPromoBotName(c, b) })
+	b.Handle(&tele.Btn{Unique: "banner_set_custom"}, func(c tele.Context) error { return handleBannerSetCustom(c, b) })
+	b.Handle(&tele.Btn{Unique: "banner_deactivate"}, func(c tele.Context) error { return handleBannerDeactivate(c, b) })
+	b.Handle(&tele.Btn{Unique: "edit_quotas"}, func(c tele.Context) error { return handleEditQuotas(c, b) })
+	b.Handle(&tele.Btn{Unique: "quota_days_public"}, func(c tele.Context) error {
+		return handleQuotaPrompt(c, b, "awaiting_quota_days_public", "Días máximos para usuarios públicos")
+	})
+	b.Handle(&tele.Btn{Unique: "quota_limit_public"}, func(c tele.Context) error {
+		return handleQuotaPrompt(c, b, "awaiting_quota_limit_public", "Dispositivos máximos para usuarios públicos")
+	})
+	b.Handle(&tele.Btn{Unique: "quota_days_admin"}, func(c tele.Context) error {
+		return handleQuotaPrompt(c, b, "awaiting_quota_days_admin", "Días máximos para Admins")
+	})
+	b.Handle(&tele.Btn{Unique: "quota_limit_admin"}, func(c tele.Context) error {
+		return handleQuotaPrompt(c, b, "awaiting_quota_limit_admin", "Dispositivos máximos para Admins")
+	})
+	b.Handle(&tele.Btn{Unique: "quota_xray_public"}, func(c tele.Context) error {
+		return handleQuotaPrompt(c, b, "awaiting_quota_xray_public", "Máx cuentas VMess para Público")
+	})
+	b.Handle(&tele.Btn{Unique: "quota_xray_admin"}, func(c tele.Context) error {
+		return handleQuotaPrompt(c, b, "awaiting_quota_xray_admin", "Máx cuentas VMess para Admins")
+	})
+	b.Handle(&tele.Btn{Unique: "quota_ssh_public"}, func(c tele.Context) error {
+		return handleQuotaPrompt(c, b, "awaiting_quota_ssh_public", "Límite máx de cuentas SSH (Público)")
+	})
+	b.Handle(&tele.Btn{Unique: "quota_ssh_admin"}, func(c tele.Context) error {
+		return handleQuotaPrompt(c, b, "awaiting_quota_ssh_admin", "Límite máx de cuentas SSH (Admins)")
+	})
+	b.Handle(&tele.Btn{Unique: "quota_zivpn_public"}, func(c tele.Context) error {
+		return handleQuotaPrompt(c, b, "awaiting_quota_zivpn_public", "Límite máx de cuentas ZiVPN (Público)")
+	})
+	b.Handle(&tele.Btn{Unique: "quota_zivpn_admin"}, func(c tele.Context) error {
+		return handleQuotaPrompt(c, b, "awaiting_quota_zivpn_admin", "Límite máx de cuentas ZiVPN (Admins)")
+	})
+	b.Handle(&tele.Btn{Unique: "reset_history"}, func(c tele.Context) error { return handleResetHistoryConfirm(c, b) })
+	b.Handle(&tele.Btn{Unique: "reset_history_exec"}, func(c tele.Context) error { return handleResetHistoryExec(c, b) })
+	b.Handle(&tele.Btn{Unique: "reboot_vps_confirm"}, func(c tele.Context) error { return handleServerRebootConfirm(c, b) })
+	b.Handle(&tele.Btn{Unique: "reboot_vps_exec"}, func(c tele.Context) error { return handleServerRebootExec(c, b) })
+	b.Handle(&tele.Btn{Unique: "toggle_public_scanner"}, func(c tele.Context) error { return handleTogglePublicScanner(c, b) })
+	b.Handle(&tele.Btn{Unique: "menu_autoreboot"}, func(c tele.Context) error { return handleAutoRebootMenu(c, b) })
+	b.Handle(&tele.Btn{Unique: "toggle_autoreboot"}, func(c tele.Context) error { return handleToggleAutoReboot(c, b) })
+	b.Handle(&tele.Btn{Unique: "menu_bans"}, func(c tele.Context) error { return handleMenuBans(c, b) })
+
+	// Updater
+	b.Handle(&tele.Btn{Unique: "menu_updater"}, func(c tele.Context) error { return handleMenuUpdater(c, b) })
+	b.Handle(&tele.Btn{Unique: "updater_check"}, func(c tele.Context) error { return handleUpdaterCheck(c, b) })
+	b.Handle(&tele.Btn{Unique: "updater_run"}, func(c tele.Context) error { return handleUpdaterRun(c, b) })
+	b.Handle(&tele.Btn{Unique: "updater_toggle_auto"}, func(c tele.Context) error { return handleUpdaterToggleAuto(c, b) })
+	b.Handle(&tele.Btn{Unique: "ban_user_prompt"}, func(c tele.Context) error { return handleBanUserPrompt(c, b) })
+
+	// Drive Backups
+	b.Handle("/authdrive", func(c tele.Context) error { return handleAuthDrive(c, b) })
+	b.Handle(&tele.Btn{Unique: "drive_backup"}, func(c tele.Context) error { return handleDriveBackup(c, b) })
+	b.Handle(&tele.Btn{Unique: "drive_restore"}, func(c tele.Context) error { return handleDriveRestore(c, b) })
+
+	// Generar Usuario SSH / ZIVPN Handler
+	b.Handle(&tele.Btn{Unique: "crear_ssh"}, func(c tele.Context) error {
+		return handleCrearSSH(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "crear_zivpn"}, func(c tele.Context) error {
+		return handleCrearZivpn(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "crear_xray"}, func(c tele.Context) error {
+		return handleCrearXray(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "ssh_rnd_pass"}, func(c tele.Context) error {
+		return handleRandomPass(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "ssh_default_title"}, func(c tele.Context) error {
+		return handleDefaultTitle(c, b)
+	})
+	b.Handle(&tele.Btn{Unique: "cancelar_accion"}, func(c tele.Context) error {
+		return handleCancel(c, b)
+	})
+
+	b.Handle(&tele.Btn{Unique: "back_main"}, func(c tele.Context) error {
+		return handleStart(c, b) // Vuelve al inicio redibujando o editando
+	})
+
+	b.Handle(&tele.Btn{Unique: "start_scanner_prompt"}, func(c tele.Context) error {
+		return handleStartScanPrompt(c, b)
+	})
+
+	// Parchar config de Xray existente para habilitar access log y configurar resiliencia
+	if initData, _ := db.Load(); initData.Xray.Installed {
+		if err := vpn.EnsureXrayAccessLog(); err != nil {
+			log.Printf("Aviso: No se pudo habilitar access log de Xray: %v", err)
+		}
+		if err := vpn.EnsureXrayServiceResilience(); err != nil {
+			log.Printf("Aviso: No se pudo asegurar la resiliencia del servicio Xray: %v", err)
+		}
+	}
+
+	// Restaurar reglas de iptables que se borran al reiniciar (SlowDNS, ZiVPN)
+	vpn.RestoreIptablesRules()
+
+	// Verificar y reiniciar HAProxy si quedó caído tras un reboot del VPS
+	if initSSL, _ := db.Load(); initSSL.SSLTunnel != "" {
+		vpn.EnsureHAProxyRunning()
+		log.Println("HAProxy: verificado y restaurado correctamente")
+	}
+
+	// Restaurar contraseñas ZiVPN en config.json tras reinicio de VPS
+	if initZivpn, _ := db.Load(); initZivpn.Zivpn && len(initZivpn.ZivpnUsers) > 0 {
+		var passwords []string
+		for pass := range initZivpn.ZivpnUsers {
+			passwords = append(passwords, pass)
+		}
+		if err := vpn.RestoreZivpnPasswords(passwords); err != nil {
+			log.Printf("Aviso: No se pudieron restaurar contraseñas ZiVPN: %v", err)
+		} else {
+			log.Printf("ZiVPN: %d contraseñas sincronizadas con config.json", len(passwords))
+		}
+	}
+
+	// Instalar sistema de banners individuales por usuario SSH
+	if err := sys.EnsureBannerSystem(); err != nil {
+		log.Printf("Aviso: No se pudo inicializar el sistema de banners: %v", err)
+	}
+	// Regenerar todos los banners existentes al iniciar
+	go sys.RefreshAllBanners()
+
+	// Iniciar hilo de auto-limpieza (Rutina concurrente)
+	go sys.AutoCleanupLoop(b)
+
+	log.Println("Bot iniciado correctamente...")
+	b.Start()
+}
+
+func isAdmin(chatID int64) bool {
+	if isSuperAdminID(chatID) {
+		return true
+	}
+	data, _ := db.Load()
+	_, exists := data.Admins[fmt.Sprintf("%d", chatID)]
+	return exists
+}
+
+func isSuperAdminID(chatID int64) bool {
+	sa, _ := strconv.ParseInt(superAdmin, 10, 64)
+	return chatID == sa
+}
+
+// SafeEdit intenta editar un mensaje, y si falla lo envía nuevo
+func SafeEdit(chatID int64, b *tele.Bot, msg *tele.Message, text string, markup *tele.ReplyMarkup) (*tele.Message, error) {
+	var newMsg *tele.Message
+	var err error
+
+	if msg != nil {
+		newMsg, err = b.Edit(msg, text, markup, tele.ModeHTML)
+	} else {
+		err = fmt.Errorf("nil message")
+	}
+
+	if err != nil {
+		// Fallback: tratar de borrar el viejo para no dejar spam
+		if msg != nil {
+			b.Delete(msg)
+		}
+		// Enviar nuevo
+		newMsg, err = b.Send(tele.ChatID(chatID), text, markup, tele.ModeHTML)
+	}
+
+	if err == nil {
+		SetLastBotMsg(chatID, newMsg)
+	}
+	return newMsg, err
+}
+
+// SafeEditCtx es un helper que facilita el uso de SafeEdit con tele.Context
+func SafeEditCtx(c tele.Context, b *tele.Bot, text string, markup *tele.ReplyMarkup) error {
+	var lastMsg *tele.Message
+	if c.Callback() != nil {
+		lastMsg = c.Message()
+	} else {
+		lastMsg = GetLastBotMsg(c.Chat().ID)
+	}
+
+	_, err := SafeEdit(c.Chat().ID, b, lastMsg, text, markup)
+	return err
+}
+
+func handleStart(c tele.Context, b *tele.Bot) error {
+	chatID := c.Chat().ID
+
+	// Limpiar cualquier estado activo al volver al menú
+	DeleteUserStep(chatID)
+
+	data, _ := db.Load()
+
+	// Registrar historial
+	found := false
+	for _, id := range data.UserHistory {
+		if id == chatID {
+			found = true
+			break
+		}
+	}
+	if !found {
+		data.UserHistory = append(data.UserHistory, chatID)
+		db.Save(data)
+	}
+
+	// Comprobar Acceso Público
+	if !data.PublicAccess && !isAdmin(chatID) {
+		textoDenegado := "🔒 <b>SISTEMA PRIVADO</b>\n\n" +
+			"Este bot está configurado para uso exclusivo de administradores.\n\n" +
+			"🚀 <b>¿BUSCAS UN SERVIDOR PREMIUM?</b>\n" +
+			"Adquiere servidores estables y de alta velocidad para tus conexiones.\n\n" +
+			"🛠️ <b>¿NECESITAS UN SCRIPT A MEDIDA?</b>\n" +
+			"Desarrollamos bots y herramientas personalizadas para tu proyecto.\n" +
+			"━━━━━━━━━━━━━━\n" +
+			"📢 <b>Canal Oficial:</b> @DarkZsaid2\n" +
+			"👤 <b>Soporte / Compras:</b> @DarkZsaid"
+
+		if c.Callback() != nil {
+			return c.Edit(textoDenegado, tele.ModeHTML)
+		}
+		return c.Send(textoDenegado, tele.ModeHTML)
+	}
+
+	// Mostrar Menú Principal
+	textoMenu := buildMainMenuText(data)
+	markup := buildMainMenuMarkup(chatID)
+
+	var msg *tele.Message
+	var err error
+	if c.Callback() != nil {
+		msg, err = b.Edit(c.Message(), textoMenu, markup, tele.ModeHTML)
+	} else {
+		msg, err = b.Send(c.Chat(), textoMenu, markup, tele.ModeHTML)
+	}
+
+	if err == nil {
+		SetLastBotMsg(chatID, msg)
+	}
+	return err
+}
+
+func buildMainMenuText(data *db.ConfigData) string {
+	texto := "💎 <b>BOT TELEGRAM DARKZSAID V7.7 (GO EDITION)</b>\n"
+	texto += "<i>Panel de Control Avanzado</i>\n\n"
+
+	stats := sys.GetSystemStats()
+
+	// CPU Formatter
+	barraCPU := sys.GenerarBarra(stats.CPUUsage, 100.0, 10)
+	texto += fmt.Sprintf("🧠 <b>CPU:</b> [%s] <code>%.1f%%</code> (%d Cores)\n", barraCPU, stats.CPUUsage, stats.Cores)
+
+	// RAM Formatter
+	barraRAM := sys.GenerarBarra(float64(stats.RAMUsed), float64(stats.RAMTotal), 10)
+	texto += fmt.Sprintf("💾 <b>RAM:</b> [%s] <code>%dMB / %dMB</code>\n", barraRAM, stats.RAMUsed, stats.RAMTotal)
+
+	// Disco
+	barraDisk := sys.GenerarBarra(float64(stats.DiskUsed), float64(stats.DiskTotal), 10)
+	texto += fmt.Sprintf("💽 <b>DISCO:</b> [%s] <code>%dGB / %dGB</code>\n", barraDisk, stats.DiskUsed, stats.DiskTotal)
+
+	texto += fmt.Sprintf("⏱️ <b>Uptime:</b> <code>%s</code>\n\n", stats.UptimeStr)
+
+	if !data.PublicAccess {
+		texto += "🔒 <i>Acceso Público: Desactivado</i>\n"
+	}
+	return texto
+}
+
+func buildMainMenuMarkup(chatID int64) *tele.ReplyMarkup {
+	menu := &tele.ReplyMarkup{}
+
+	btnCrear := menu.Data("👤 Crear SSH", "menu_crear")
+	btnInfo := menu.Data("📡 Info Servidor", "menu_info")
+	btnEditar := menu.Data("✏️ Editar SSH", "menu_editar")
+	btnDelete := menu.Data("🗑️ Eliminar SSH", "menu_eliminar")
+	btnInfoCuenta := menu.Data("ℹ️ Info Cuenta", "menu_info_cuenta")
+	btnGlobal := menu.Data("📢 Mensaje Global", "menu_broadcast")
+	btnScanner := menu.Data("🔍 Escaner", "menu_scanner")
+	btnOnline := menu.Data("⚙️ Monitor Online", "menu_online")
+	btnProtocols := menu.Data("⚙️ Protocolos", "menu_protocols")
+	btnSettings := menu.Data("⚙️ Ajustes Pro", "menu_admins")
+
+	data, _ := db.Load()
+	sa, _ := strconv.ParseInt(superAdmin, 10, 64)
+	isSA := chatID == sa
+	isAdm := isAdmin(chatID)
+
+	// Construir filas dinámicamente
+	var rows []tele.Row
+
+	// Fila 1: Crear e Info
+	rows = append(rows, menu.Row(btnCrear, btnInfo))
+
+	// Fila 2: Scanner (Always for Admins, conditional for Public)
+	if isSA || isAdm || data.PublicScanner {
+		rows = append(rows, menu.Row(btnScanner))
+	}
+
+	// Fila 3: Editar y Online
+	if isSA || isAdm {
+		rows = append(rows, menu.Row(btnEditar, btnOnline))
+	} else {
+		rows = append(rows, menu.Row(btnOnline))
+	}
+
+	// Fila 4: Info Cuenta y Eliminar
+	rows = append(rows, menu.Row(btnInfoCuenta, btnDelete))
+
+	// Fila 5: SuperAdmin / Admin Config
+	if isSA {
+		rows = append(rows, menu.Row(btnGlobal, btnProtocols))
+		rows = append(rows, menu.Row(btnSettings))
+	} else if isAdm {
+		rows = append(rows, menu.Row(btnSettings))
+	}
+
+	// Asignar filas al menú
+	menu.Inline(rows...)
+
+	return menu
+}
+
+func menuCrearText() string {
+	return "📝 <b>¿Qué deseas crear?</b>"
+}
+
+func menuCrearMarkup() *tele.ReplyMarkup {
+	menu := &tele.ReplyMarkup{}
+	btnSSH := menu.Data("👤 Cliente SSH", "crear_ssh")
+	btnZivpn := menu.Data("🛰️ Acceso ZIVPN", "crear_zivpn")
+	btnXray := menu.Data("💎 VMess (Xray)", "crear_xray")
+	btnBack := menu.Data("🔙 Volver", "back_main")
+
+	data, _ := db.Load()
+	var rows []tele.Row
+	rows = append(rows, menu.Row(btnSSH))
+	rows = append(rows, menu.Row(btnZivpn))
+	if data.Xray.Installed {
+		rows = append(rows, menu.Row(btnXray))
+	}
+	rows = append(rows, menu.Row(btnBack))
+
+	menu.Inline(rows...)
+	return menu
+}
